@@ -11,4 +11,4 @@ install:
 before_script:
   - composer self-update
 script:
-  - bats tests/bats/suite.bats
+  - bats tests/bats
