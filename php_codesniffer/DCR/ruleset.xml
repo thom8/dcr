@@ -1,0 +1,270 @@
+<?xml version="1.0"?>
+<ruleset name="DCR">
+  <!--
+  @see http://pear.php.net/manual/en/package.php.php-codesniffer.annotated-ruleset.php
+  Make sure that you use dollar sign ($) at the end of each file extension
+  pattern.
+  -->
+  <description>DCR PHP_CodeSniffer standards.</description>
+
+  <!--
+    Include existing standards.
+  -->
+  <rule ref="vendor/drupal/coder/coder_sniffer/Drupal"/>
+  <rule ref="vendor/drupal/coder/coder_sniffer/DrupalPractice"/>
+  <rule ref="vendor/coltrane/DrupalSecure/DrupalSecure"/>
+  <rule ref="Squiz.WhiteSpace.FunctionOpeningBraceSpace"/>
+
+  <!--
+    Include custom DCR standards.
+  -->
+  <rule ref="DCR.WhiteSpace.FunctionClosingBraceSpace"/>
+  <rule ref="DCR.Debug.JSLint"/>
+  <!--
+    Replace line length check sniff with slightly customised sniff that
+    respects commented code. These are the comments preceded by the line with
+    @code and ended by the line with @endcode.
+  -->
+  <rule ref="Drupal.Files.LineLength.TooLong">
+    <exclude-pattern>*</exclude-pattern>
+  </rule>
+  <rule ref="DCR.Files.LineLength.TooLong"/>
+
+  <!--
+    Exclude puppet files.
+  -->
+  <exclude-pattern>puppet/*</exclude-pattern>
+
+  <!--
+    Exclude contrib modules.
+  -->
+  <exclude-pattern>*/modules/contrib/*</exclude-pattern>
+  <exclude-pattern>*/themes/rubik/*</exclude-pattern>
+  <exclude-pattern>*/themes/tao/*</exclude-pattern>
+  <exclude-pattern>*/themes/omega/*</exclude-pattern>
+
+  <!--
+    Exclude libraries.
+  -->
+  <exclude-pattern>*/libraries/*</exclude-pattern>
+
+  <!--
+    Exclude patches.
+  -->
+  <exclude-pattern>*\.patch$</exclude-pattern>
+
+  <!--
+    Exclude text files.
+  -->
+  <exclude-pattern>*\.txt$</exclude-pattern>
+  <exclude-pattern>*\.TXT$</exclude-pattern>
+
+  <!--
+    Exclude all XML files.
+  -->
+  <exclude-pattern>*\.xml$</exclude-pattern>
+
+  <!--
+    Exclude all CSS files.
+  -->
+  <exclude-pattern>*\.css$</exclude-pattern>
+  <exclude-pattern>*\.scss$</exclude-pattern>
+
+  <!--
+    Exclude all JAR files.
+  -->
+  <exclude-pattern>*\.jar$</exclude-pattern>
+
+  <!--
+    Exclude all shell script files.
+  -->
+  <exclude-pattern>*\.sh$</exclude-pattern>
+
+  <!--
+    Exclude all images files.
+  -->
+  <exclude-pattern>*\.jpg$</exclude-pattern>
+  <exclude-pattern>*\.JPG$</exclude-pattern>
+  <exclude-pattern>*\.jpeg$</exclude-pattern>
+  <exclude-pattern>*\.JPEG$</exclude-pattern>
+  <exclude-pattern>*\.bmp$</exclude-pattern>
+  <exclude-pattern>*\.BMP$</exclude-pattern>
+  <exclude-pattern>*\.png$</exclude-pattern>
+  <exclude-pattern>*\.PNG$</exclude-pattern>
+  <exclude-pattern>*\.psd$</exclude-pattern>
+  <exclude-pattern>*\.PSD$</exclude-pattern>
+  <exclude-pattern>*\.ai$</exclude-pattern>
+  <exclude-pattern>*\.AI$</exclude-pattern>
+  <exclude-pattern>*\.indd$</exclude-pattern>
+  <exclude-pattern>*\.INDD$</exclude-pattern>
+  <exclude-pattern>*\.svg</exclude-pattern>
+  <exclude-pattern>*\.gif</exclude-pattern>
+
+  <!--
+    Exclude media files.
+  -->
+  <exclude-pattern>*\.mp3</exclude-pattern>
+  <exclude-pattern>*\.wav</exclude-pattern>
+  <exclude-pattern>*\.ogg</exclude-pattern>
+  <exclude-pattern>*\.mp4</exclude-pattern>
+  <exclude-pattern>*\.webm</exclude-pattern>
+  <exclude-pattern>*\.m4v</exclude-pattern>
+
+  <!--
+    Exclude font files.
+  -->
+  <exclude-pattern>*\.eot</exclude-pattern>
+  <exclude-pattern>*\.ttf</exclude-pattern>
+  <exclude-pattern>*\.woff</exclude-pattern>
+
+  <!--
+    Exclude CSV files.
+  -->
+  <exclude-pattern>*\.csv</exclude-pattern>
+
+  <!--
+    Exclude external tools.
+  -->
+  <exclude-pattern>ultimatejslint\.js</exclude-pattern>
+  <exclude-pattern>simplesamlphp/*</exclude-pattern>
+  <exclude-pattern>LoremIpsum.class.php</exclude-pattern>
+  <exclude-pattern>apc.php</exclude-pattern>
+
+  <!--
+    Exclude this standard's test files.
+  -->
+  <exclude-pattern>StandardsTests/hooks\.valid\.php</exclude-pattern>
+  <exclude-pattern>StandardsTests/hooks\.invalid\.php</exclude-pattern>
+
+  <!--
+    Exclude theme Gruntfile.
+  -->
+  <exclude-pattern>Gruntfile\.js</exclude-pattern>
+
+  <!--
+    Exclude javascript files that override core or contrib functionality
+  -->
+  <exclude-pattern>*/sites/all/themes/brightday/js/overrides/*</exclude-pattern>
+
+  <!--
+    Short single line on functions definitions can be multiline.
+  -->
+  <rule ref="Drupal.Commenting.FunctionComment.ShortSingleLine">
+    <!--.install files-->
+    <exclude-pattern>*\.install$</exclude-pattern>
+    <!--.test files-->
+    <exclude-pattern>*\.test$</exclude-pattern>
+  </rule>
+
+  <!--
+    CTools and some other contrib modules are using incorrect naming
+    schema for class methods.
+  -->
+  <rule ref="Drupal.NamingConventions.ValidFunctionName.ScopeNotLowerCamel">
+    <!--Context condition and reaction-->
+    <exclude-pattern>*_reaction\.*</exclude-pattern>
+    <exclude-pattern>*_condition\.*</exclude-pattern>
+    <exclude-pattern>*_context_condition_*</exclude-pattern>
+    <exclude-pattern>*_context_reaction_*</exclude-pattern>
+    <exclude-pattern>*_context_*</exclude-pattern>
+
+    <!--
+      Any entity classes need to be placed in files with a .entity suffix eg
+      my_module.entity_admin.inc or my_module.entity_controller.inc.
+    -->
+    <exclude-pattern>*\.entity*</exclude-pattern>
+
+    <!--Anything within plugins dir is usually related to CTools-->
+    <exclude-pattern>*/plugins/*\.*</exclude-pattern>
+  </rule>
+  <!--Same as above-->
+  <rule ref="Drupal.NamingConventions.ValidFunctionName.NotLowerCamel">
+    <!--Context condition and reaction-->
+    <exclude-pattern>*_context_*</exclude-pattern>
+    <!--Views plugins-->
+    <exclude-pattern>*/plugins/*\.*</exclude-pattern>
+  </rule>
+
+  <!--
+    Views includes should allow rewriting of Format state input for exposed
+    forms.
+  -->
+  <rule ref="DrupalPractice.General.FormStateInput.Input">
+    <exclude-pattern>*\.views\.inc*</exclude-pattern>
+  </rule>
+
+  <!--
+    Disable SQL Injection checking in some files.
+  -->
+  <rule ref="DrupalSecure.General.Helper.SQLi.dbQuery">
+    <!--.install files-->
+    <exclude-pattern>*\.install$</exclude-pattern>
+  </rule>
+
+  <!--
+    Do not check that class name starts with capitals.
+  -->
+  <rule ref="Drupal.NamingConventions.ValidClassName.StartWithCaptial">
+    <!--Context files-->
+    <exclude-pattern>.*_context_.*</exclude-pattern>
+    <!--Views plugins-->
+    <exclude-pattern>*/plugins/*\.*</exclude-pattern>
+  </rule>
+
+  <!--
+    Do not check that class starts with module name.
+  -->
+  <rule ref="DrupalPractice.General.ClassName.ClassPrefix">
+    <!--.test files-->
+    <exclude-pattern>*\.test$</exclude-pattern>
+    <!--Sniff files-->
+    <exclude-pattern>*Sniff\.php</exclude-pattern>
+    <!--Views plugins-->
+    <exclude-pattern>*/plugins/*\.*</exclude-pattern>
+  </rule>
+
+  <!--
+    Do not check that class does not contain underscores.
+  -->
+  <rule ref="Drupal.NamingConventions.ValidClassName.NoUnderscores">
+    <!--Sniff files-->
+    <exclude-pattern>*Sniff\.php</exclude-pattern>
+    <!--Context plugins-->
+    <exclude-pattern>.*_context_.*</exclude-pattern>
+    <!--Views plugins-->
+    <exclude-pattern>*/plugins/*\.*</exclude-pattern>
+  </rule>
+
+  <!--
+    Do not check that global variable is prefixed with a module name for
+    settings files.
+  -->
+  <rule ref="Drupal.NamingConventions.ValidGlobal.GlobalUnderScore">
+    <!--Settings files-->
+    <exclude-pattern>settings\.php</exclude-pattern>
+  </rule>
+
+  <!--
+    Do not check that function name start with capital letter.
+  -->
+  <rule ref="Drupal.Commenting.FunctionComment.ShortNotCapital">
+    <!--Install files-->
+    <exclude-pattern>*\.install</exclude-pattern>
+  </rule>
+
+  <!--
+    Do not check that non-magic class method can start with double underscores.
+  -->
+  <rule ref="Drupal.NamingConventions.ValidFunctionName.MethodDoubleUnderscore">
+    <!--Provisioning files-->
+    <exclude-pattern>*provision*\.php</exclude-pattern>
+  </rule>
+
+  <!--
+    DO NOT INCLUDE ANYTHING BELOW THIS LINE.
+  -->
+  <!--
+    Include App ruleset.
+  -->
+  <rule ref="php_codesniffer/App"/>
+</ruleset>

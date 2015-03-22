@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<ruleset name="App">
+  <description>App custom PHP_CodeSniffer standards overrides.</description>
+</ruleset>
