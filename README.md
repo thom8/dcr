@@ -1,4 +1,4 @@
-# Drupal Code Review (DCR) [![build status](http://img.shields.io/travis/badges/shields.svg)](https://travis-ci.org/badges/shields)
+# Drupal Code Review (DCR) [![Build Status](https://travis-ci.org/alexdesignworks/drupal-code-review.svg?branch=master)](https://travis-ci.org/alexdesignworks/drupal-code-review)
 
 ## What is it?
 Drupal Code Review (DCR) is a command-line utility to check that produced code follows Drupal coding standards and best practices.
