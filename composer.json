@@ -39,10 +39,17 @@
     }
   ],
   "require": {
+    "symfony/console": "2.6.5",
+    "cpliakas/git-wrapper": "~1.0",
     "coltrane/DrupalSecure": "master",
     "drupal/coder": "~8.2",
     "douglascrockford/JSLint": "master",
     "mozilla/rhino": "~1.75"
+  },
+  "autoload": {
+    "psr-0": {
+      "": "src/"
+    }
   },
   "scripts": {
     "post-install-cmd": [
