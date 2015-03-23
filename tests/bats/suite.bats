@@ -1,5 +1,13 @@
 #!/usr/bin/env bats
 
+@test "phpcs binary present" {
+  ls vendor/bin/phpcs
+}
+
+@test "phpcbf binary present" {
+  ls vendor/bin/phpcbf
+}
+
 @test "Drupal package present" {
   ls vendor/drupal/coder/coder_sniffer/Drupal/ruleset.xml
 }
