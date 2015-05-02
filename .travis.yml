@@ -4,15 +4,16 @@ php:
 before_install:
   - sudo add-apt-repository ppa:duggan/bats --yes
   - sudo apt-get update -qq
+  # Install bats CLI testing.
   - sudo apt-get install -qq bats
+  # Update composer to the latest version.
+  - composer self-update
 install:
   # Refresh environment variables.
   - phpenv rehash
   # Run installation of all dependencies unsing composer.
   - composer install
 before_script:
-  # Update composer to the latest version.
-  - composer self-update
   # Export phpunit path.
   - export PATH=$PATH:~/.composer/vendor/bin/
 script:
