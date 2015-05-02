@@ -33,7 +33,11 @@
 }
 
 @test "phpunit is available in current session" {
-  command -v ./phpunit
+  command -v phpunit
+}
+
+@test "phpunit version is the same as specified in composer" {
+  run phpunit --version
 }
 
 @test "dcr command available in current session" {
