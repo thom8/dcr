@@ -32,6 +32,10 @@
   ls jslint/ultimatejslint.js
 }
 
+@test "phpunit is available in current session" {
+  command -v ./phpunit
+}
+
 @test "dcr command available in current session" {
   command -v ./dcr
 }
