@@ -13,10 +13,7 @@ install:
   - phpenv rehash
   # Run installation of all dependencies unsing composer.
   - composer install
-before_script:
-  # Export phpunit path.
-  - export PATH=$PATH:~/.composer/vendor/bin/
 script:
   # Run environment tests.
   - bats tests/bats
-  - phpunit
+  - ./vendor/phpunit/phpunit/phpunit
