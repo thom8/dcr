@@ -40,6 +40,7 @@
   ],
   "require": {
     "symfony/console": "2.6.5",
+    "symfony/finder": "2.7.0",
     "cpliakas/git-wrapper": "~1.0",
     "coltrane/DrupalSecure": "master",
     "drupal/coder": "~8.2",

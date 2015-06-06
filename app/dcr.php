@@ -15,6 +15,7 @@ use dcr\Commands\ReviewCommand;
 
 define('DCR_APP_NAME', 'Drupal Code Review (DCR)');
 define('DCR_APP_VERSION', '0.1');
+define('ROOT_DIR', realpath(__DIR__ . '/..'));
 
 // Init application.
 $app = new DcrApplication(DCR_APP_NAME, DCR_APP_VERSION);
