@@ -13,6 +13,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\Process\Process;
 
 /**
  * Class ReviewCommand
@@ -164,6 +165,17 @@ EOT
     $discovered_files = array();
 
     return $discovered_files;
+  }
+
+  protected function executeCommand($command) {
+    $process = new Process($command);
+    $process->run();
+
+    if (!$process->isSuccessful()) {
+      throw new \RuntimeException($process->getErrorOutput());
+    }
+
+    return trim($process->getOutput());
   }
 
   /**
