@@ -5,12 +5,12 @@
  */
 namespace dcr\Commands;
 
+use GitWrapper\GitWorkingCopy;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Process\Process;
@@ -91,11 +91,17 @@ EOT
       return;
     }
 
-    // Discover files if not explicitly specified as argument.
-    if (!$files = $input->getArgument('filename')) {
-      $files = $this->discoverFiles($options['main-branch'], $options['mine']);
+    if ($files = $input->getArgument('filename')) {
+      $files = $this->discoverFilesDir($files);
+      $this->outputFilesInfo($files, $output);
     }
-    // Review files with set limit.
+    // Discover files if not explicitly specified as argument.
+    else {
+      $files = $this->discoverFilesGitChanged($options['main-branch'], $options['mine']);
+      $this->outputFilesInfoFromCommits($files, $output);
+    }
+
+    // Review files with set error limit.
     $results = $this->reviewFiles($files, $options['limit']);
 
     $this->outputResults($results, $output);
@@ -110,7 +116,77 @@ EOT
   }
 
   /**
-   * Ouput available standards as a table.
+   * Discover files from provided sources.
+   *
+   * @param array $sources
+   *   Array of source files or dirs to discover from.
+   *
+   * @return array
+   *   Array of all found files.
+   */
+  protected function discoverFilesDir($sources) {
+    $discovered_files = array();
+
+    $sources = is_array($sources) ? $sources : array($sources);
+    foreach ($sources as $source) {
+      // Source is a file.
+      if (is_file($source)) {
+        $discovered_files[] = $source;
+      }
+      // Source is a directory - find all files in all subdirs.
+      elseif (is_dir($source)) {
+        $finder = new Finder();
+        $finder_results = $finder->files()
+          ->in($source)
+          ->name('*');
+
+        $discovered_files = array_merge($discovered_files, array_keys(iterator_to_array($finder_results)));
+      }
+      else {
+        // Skip this incorrect source.
+        // @todo: Add proper exception throwing here.
+      }
+    }
+
+    return $discovered_files;
+  }
+
+  /**
+   * Output information about found files.
+   *
+   * @param $files
+   * @param OutputInterface $output
+   */
+  protected function outputFilesInfo($files, OutputInterface $output) {
+    $output->writeLn($this->formatString('Found @count_files files', array(
+      '@count_files' => count($files),
+    )));
+  }
+
+  /**
+   * Output information about found files from commits.
+   *
+   * @param $commits
+   * @param OutputInterface $output
+   */
+  protected function outputFilesInfoFromCommits($commits, OutputInterface $output) {
+    $total_commit_files = 0;
+    foreach ($commits as $sha => $commit) {
+      $total_commit_files += count($commit['files']);
+    }
+
+    $output->writeLn($this->formatString('Found @count_files files in @count_commits commits', array(
+      '@count_files' => $total_commit_files,
+      '@count_commits' => count($commits),
+    )));
+  }
+
+  private function formatString($string, $args = array()) {
+    return strtr($string, $args);
+  }
+
+  /**
+   * Output available standards as a table.
    *
    * @param OutputInterface $output
    *   Output interface.
@@ -161,12 +237,139 @@ EOT
     return '';
   }
 
-  protected function discoverFiles($main_branch) {
+  /**
+   * Returns information about discovered files.
+   *
+   * @param string $main_branch
+   *   Main branch to get file difference.
+   * @param bool|string $committer
+   *   Committer name as string or TRU for auto-discovery from git settings
+   *   for current user. Defaults to FALSE which means that no filtering will
+   *   be applied.
+   *
+   * @return array
+   *   Array of discovered files information.
+   */
+  protected function discoverFilesGitChanged($main_branch, $committer = FALSE) {
     $discovered_files = array();
+
+    $current_branch = $this->getGitCurrentBranch();
+
+    // Nothing to work on.
+    if ($current_branch == $main_branch) {
+      return $discovered_files;
+    }
+
+    // Fallback to auto discoverable current user committer.
+    $committer = is_bool($committer) ? $this->getGitCurrentUserConfigField('email') : $committer;
+
+    // Return list of changed files as info line followed by changed files list.
+    $discovered_files = $this->getGitChangedFiles($main_branch, $committer);
 
     return $discovered_files;
   }
 
+  /**
+   * Get changed files comparing to another git branch, filtered by committer.
+   *
+   * @param string $compare_to_branch
+   *   Branch name to compare to.
+   * @param string $author_mail
+   *   Optional author's email.
+   *
+   * @return array
+   *   Associative array of commits information, keyed by commit's SHA. Each
+   *   element of array has the following keys:
+   *   - sha: A copy of commit sha from the key.
+   *   - subject: Commit subject.
+   *   - email: String committer email.
+   *   - timestamp: Integer commit timestamp.
+   *   - files: Array of changed files.
+   */
+  protected function getGitChangedFiles($compare_to_branch, $author_mail = '') {
+    // Create special prefix to distinguish as a start of information section in
+    // the output.
+    $prefix = 'Info: ';
+    // Return list of changed files as info line followed by changed files list.
+    $command = "git show --committer=" . $author_mail . " --pretty='format:" . $prefix . "%H|%ce|%s|%ct' --name-only $( git cherry -v " . $compare_to_branch . " | grep '^+' | awk '{ print($2) }' ) | egrep -v '^(commit |Author:|Date:|\s|$)'";
+    $output = $this->executeCommand($command);
+    $output = explode("\n", $output);
+
+    $commits = array();
+    $sha = FALSE;
+    foreach ($output as $line) {
+      if (strpos($line, $prefix) === 0) {
+        $line = substr($line, strlen($prefix));
+        $items = explode('|', $line);
+        $sha = $items[0];
+        $commits[$sha] = array(
+          'sha' => $sha,
+          'email' => $items[1],
+          'subject' => $items[2],
+          'timestamp' => $items[3],
+          'files' => array(),
+        );
+      }
+      elseif ($sha) {
+        // Add files.
+        $filename = $this->getGitRootPath() . '/' . trim($line);
+        if (file_exists($filename)) {
+          $commits[$sha]['files'][$filename] = '';
+        }
+      }
+    }
+
+    // Filter-out old files to return only the latest committer-per file.
+    $commits_reverted = array_reverse($commits);
+    $files = array();
+    foreach ($commits_reverted as $sha => $commit) {
+      foreach ($commit['files'] as $filename => $tmp) {
+        if (in_array($filename, $files)) {
+          unset($commits_reverted[$sha]['files'][$filename]);
+        }
+        else {
+          $files[] = $filename;
+        }
+      }
+    }
+    $commits = array_reverse($commits_reverted);
+
+    return $commits;
+  }
+
+  /**
+   * Helper to return system path to topmost (root) directory in git repository.
+   *
+   * @return string
+   *   System path.
+   */
+  protected function getGitRootPath() {
+    return $this->executeCommand('git rev-parse --show-toplevel');
+  }
+
+  protected function getGitCurrentBranch() {
+    return $this->executeCommand('git rev-parse --abbrev-ref HEAD');
+  }
+
+  /**
+   * Helper to return current git repository user field.
+   *
+   * @return string
+   *   String value of specified user field.
+   */
+  protected function getGitCurrentUserConfigField($field) {
+    return $this->executeCommand('git config user.' . $field);
+  }
+
+  /**
+   * Execute CLI command and return the output.
+   *
+   * @param string $command
+   *   Command to execute.
+   *
+   * @return string
+   *   Command output.
+   */
   protected function executeCommand($command) {
     $process = new Process($command);
     $process->run();
