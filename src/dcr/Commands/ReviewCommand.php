@@ -23,17 +23,42 @@ use Symfony\Component\Console\Helper\ProgressBar;
  * @package dcr\Commands
  */
 class ReviewCommand extends Command {
+  /**
+   * Defines normal exit code.
+   */
   const EXIT_CODE_OK = 0;
+
+  /**
+   * Defines code review success code.
+   */
   const EXIT_CODE_REVIEW_SUCCESS = self::EXIT_CODE_OK;
+
+  /**
+   * Defines code review failed code.
+   */
   const EXIT_CODE_REVIEW_FAILED = 1;
+
+  /**
+   * Defines application error code.
+   */
   const EXIT_CODE_APPLICATION_ERROR = 255;
 
+  /**
+   * @var int
+   *   Review exit code.
+   */
   protected $reviewExitCode = self::EXIT_CODE_APPLICATION_ERROR;
 
+  /**
+   * Set review exit code.
+   */
   protected function setReviewExitCode($code) {
     $this->reviewExitCode = $code;
   }
 
+  /**
+   * Get review exit code.
+   */
   protected function getReviewExitCode() {
     return $this->reviewExitCode;
   }
@@ -104,7 +129,7 @@ EOT
     if ($options['standard-list']) {
       $this->outputAvailableStandards($output);
 
-      return;
+      return self::EXIT_CODE_OK;
     }
 
     if ($files = $input->getArgument('filename')) {
