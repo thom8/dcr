@@ -48,10 +48,10 @@ class ReviewCommand extends Command {
       ->setHelp(<<<EOT
 Drupal Code Review (DCR) is a command-line utility to check that produced code follows Drupal coding standards and best practices.
 
-Reviews code in files changed between 2 branches and sends emails to authors in case of found code problems.
+It performs code review in files changed between 2 branches and sends emails to authors in case of found code problems.
 
 Usage:
-Compare current branch with master branch and output results to stdout.
+Compare current branch with 'master' branch and output results to stdout.
 <info>dcr</info>
 
 Review code within specified file and output results to stdout. File path within Drupal root will be resolved automatically.
@@ -61,16 +61,16 @@ Review code within specified file and output results to stdout. File path within
 Compare custom main branch with current branch and output results to stdout.
 <info>dcr --main-branch=custom_branch</info>
 
-Compare current branch with master branch and save output as a report file.
+Compare current branch with 'master' branch and save output as a report file.
 <info>dcr --report=/path/to/report.txt</info>
 
-Compare current branch with master branch and save results as report files, one for each account.
+Compare current branch with 'master' branch and save results as report files, one for each account.
 <info>dcr --reports=/path/to/reports/directory</info>
 
 Send reports to respected authors' emails using pipe-separated email parameters.
 <info>dcr --sendmail=Code review for !branch|Hello !author\\nBelow is a code review result for branch !branch: !report|do-not-reply@example.com</info>
 
-Compare current branch with master branch using only Drupal standard.
+Compare current branch with 'master' branch using only Drupal standard.
 <info>dcr --standard=Drupal</info>
 
 List standards available in the system.
