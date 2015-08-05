@@ -15,5 +15,9 @@ install:
   - composer install
 script:
   # Run environment tests.
-  - bats tests/bats
+  - bats tests/bats/environment.bats
+  # Run integration tests.
+  - bats tests/bats/app.bats
+  # Run unit tests.
+  # @todo: Move this to the top once these tests implemented.
   - ./vendor/phpunit/phpunit/phpunit

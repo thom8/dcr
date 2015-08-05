@@ -1,4 +1,10 @@
 #!/usr/bin/env bats
+#
+# Environment tests for DCR.
+#
+# Tests to make sure that environment has all required dependencies and is ready
+# to be used for DCR.
+#
 
 @test "phpcs binary present" {
   ls vendor/bin/phpcs
