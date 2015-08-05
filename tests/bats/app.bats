@@ -15,19 +15,19 @@ load test_helper
 }
 
 @test "Valid file" {
-  run php app/dcr.php tests/standards_fixtures/hooks.valid.php
+  run php app/dcr.php $(project_root)/tests/standards_fixtures/hooks.valid.php
 
   [ "$status" -eq 0 ]
 }
 
 @test "Invalid file" {
-  run php app/dcr.php tests/standards_fixtures/hooks.invalid.php
+  run php app/dcr.php $(project_root)/tests/standards_fixtures/hooks.invalid.php
 
   [ "$status" -eq 1 ]
 }
 
 @test "Directory" {
-  run php app/dcr.php tests/standards_fixtures
+  run php app/dcr.php $(project_root)/tests/standards_fixtures
 
   [ "$status" -eq 1 ]
 }
