@@ -5,7 +5,6 @@
  */
 namespace dcr\Commands;
 
-use GitWrapper\GitWorkingCopy;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -14,6 +13,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Process\Process;
+use Symfony\Component\Console\Helper\ProgressBar;
 
 /**
  * Class ReviewCommand
@@ -23,6 +23,21 @@ use Symfony\Component\Process\Process;
  * @package dcr\Commands
  */
 class ReviewCommand extends Command {
+  const EXIT_CODE_OK = 0;
+  const EXIT_CODE_REVIEW_SUCCESS = self::EXIT_CODE_OK;
+  const EXIT_CODE_REVIEW_FAILED = 1;
+  const EXIT_CODE_APPLICATION_ERROR = 255;
+
+  protected $reviewExitCode = self::EXIT_CODE_APPLICATION_ERROR;
+
+  protected function setReviewExitCode($code) {
+    $this->reviewExitCode = $code;
+  }
+
+  protected function getReviewExitCode() {
+    return $this->reviewExitCode;
+  }
+
   /**
    * {@inheritdoc}
    */
@@ -36,7 +51,7 @@ class ReviewCommand extends Command {
       new InputArgument('filename', InputArgument::OPTIONAL, 'File or directory to review', NULL),
       // Options.
       new InputOption('main-branch', 'm', InputOption::VALUE_REQUIRED, 'Main branch. Defaults to \'auto\' meaning that it will be discovered according to branch-development conventions.', 'master'),
-      new InputOption('standard', 's', InputOption::VALUE_REQUIRED, 'Set standards to use. Example: Drupal,DrupalPractice', FALSE),
+      new InputOption('standard', NULL, InputOption::VALUE_REQUIRED, 'Set standards to use. Example: Drupal,DrupalPractice', FALSE),
       new InputOption('standard-list', NULL, InputOption::VALUE_NONE, 'Show available standards'),
       new InputOption('mine', NULL, InputOption::VALUE_NONE, 'Scan files committed by current user only.'),
       new InputOption('limit', NULL, InputOption::VALUE_REQUIRED, 'Set a limits on number of files to be scanned. By default, limit is set to 10. Set to "no" to avoid any limit.', 10),
@@ -44,6 +59,7 @@ class ReviewCommand extends Command {
       new InputOption('report-split', NULL, InputOption::VALUE_NONE, 'Save results as multiple report files for each committer.'),
       new InputOption('sendmail', NULL, InputOption::VALUE_REQUIRED, 'Flag to send emails. Value is a pipe-separated string of subject, body and from fields. Can be left blank to use default field values.' . "\r\n" . "Supported placeholders:\r\n  !author - commit author\r\n  !branch - current branch name\r\n  !report - current report. Example value: /path/to/sendmail"),
       new InputOption('include-empty', NULL, InputOption::VALUE_NONE, 'Include empty results in report generation.'),
+      new InputOption('sniff-codes', 's', InputOption::VALUE_NONE, 'Show sniff codes in all reports.'),
     ))
       ->setHelp(<<<EOT
 Drupal Code Review (DCR) is a command-line utility to check that produced code follows Drupal coding standards and best practices.
@@ -101,8 +117,7 @@ EOT
       $this->outputFilesInfoFromCommits($files, $output);
     }
 
-    // Review files with set error limit.
-    $results = $this->reviewFiles($files, $options['limit']);
+    $results = $this->reviewFiles($files, $options['limit'], $options['sniff-codes'], $output);
 
     $this->outputResults($results, $output);
 
@@ -113,6 +128,8 @@ EOT
     if ($options['sendmail']) {
       $this->sendMail($results, $options['sendmail']);
     }
+
+    return $this->getReviewExitCode();
   }
 
   /**
@@ -231,10 +248,143 @@ EOT
   }
 
   /**
-   * Review provided files.
+   * Return path to default standard.
    */
-  protected function reviewFiles($files) {
-    return '';
+  protected function getDefaultStandard() {
+    $standards = $this->findAvailableStandards(ROOT_DIR);
+
+    // @todo: Add reading of default standard from the config file.
+    $default_standard_name = 'DCR';
+
+    if (!in_array($default_standard_name, $standards)) {
+      throw new \RuntimeException('Unable to find default standard ' . $default_standard_name);
+    }
+
+    return array_search($default_standard_name, $standards);
+  }
+
+  /**
+   * Review provided files and output review progress.
+   *
+   * @param array $files
+   *   Array of files to review.
+   * @param int $error_threshold
+   *   Optional integer error threshold. Defaults to 0 meaning no threshold.
+   * @param bool $show_sniff_codes
+   *   Optional flag to show sniff codes within a review. Defaults to FALSE.
+   * @param OutputInterface $output
+   *   Output interface for progress bar.
+   *
+   * @return array
+   *   Array of review results with file paths as keys and strings of review
+   *   results as values.
+   */
+  protected function reviewFiles($files, $error_threshold = 0, $show_sniff_codes = FALSE, $output) {
+    // Exit code that will be returned to the caller. This will contain a
+    // boolean sum of all reviews.
+    $exit_code_final = self::EXIT_CODE_REVIEW_SUCCESS;
+
+    // Create a new progress bar.
+    $progress_bar = new ProgressBar($output, count($files));
+
+    $results = array();
+    $error_count = 0;
+    foreach ($files as $file) {
+      // Stop processing if maximum review error count is reached.
+      if ($error_threshold > 0 && $error_count >= $error_threshold) {
+        break;
+      }
+
+      // Review single file and get results.
+      $result = $this->reviewFile($file, $show_sniff_codes);
+
+      $exit_code_final = $exit_code_final | $result['code'];
+      $error_count = $result['code'] === self::EXIT_CODE_REVIEW_FAILED ? $error_count + 1 : $error_count;
+
+      // Store output results for each file separately.
+      $results[$file] = $result['output'];
+
+      // Advance the progress bar.
+      $progress_bar->advance();
+    }
+
+    // Stop and reset the progress bar.
+    $progress_bar->finish();
+    $progress_bar->clear();
+
+    // Store all command exit codes to return to the main calling process.
+    $this->setReviewExitCode($exit_code_final);
+
+    // Capture and return command output.
+    return $results;
+  }
+
+  /**
+   * Review a single file.
+   *
+   * @param string $file
+   *   Absolute path to the file.
+   * @param bool $show_sniff_codes
+   *   Optional flag to show sniff codes within a review. Defaults to FALSE.
+   *
+   * @return array
+   *   Array of review results with the following keys:
+   *   - output: String output from review command.
+   *   - code: Integer exit code from the review command.
+   */
+  protected function reviewFile($file, $show_sniff_codes = FALSE) {
+    // Build command string.
+    $command = $this->buildReviewCommand($file, $show_sniff_codes);
+
+    $process = new Process($command);
+    $exit_code = $process->run();
+
+    // Track review result separately to any other phpcs application errors.
+    if ($exit_code != self::EXIT_CODE_REVIEW_SUCCESS && $exit_code != self::EXIT_CODE_REVIEW_FAILED) {
+      throw new \RuntimeException('Error occurred while performing file ' . $file . ' review.');
+    }
+
+    return array(
+      'output' => trim($process->getOutput()),
+      'code' => $exit_code,
+    );
+  }
+
+  /**
+   * Build review command string for specified file.
+   */
+  protected function buildReviewCommand($file, $show_sniff_codes) {
+    $binary = $this->binaryFilenameLookup('phpcs');
+
+    $options = array(
+      'standard' => $this->getDefaultStandard(),
+      'colors' => NULL,
+    );
+
+    if ($show_sniff_codes) {
+      $options['s'] = NULL;
+    }
+    $options = $this->commandOptionsStringify($options);
+
+    return $binary . ' ' . $options . ' ' . $file;
+  }
+
+  /**
+   * Lookup binary filename and return full path.
+   *
+   * @param string $name
+   *   Binary name.
+   *
+   * @return string|boolean
+   *   Absolute path for binary or FALSE if binary was not found.
+   */
+  protected function binaryFilenameLookup($name) {
+    static $files = array();
+    if (!isset($files[$name])) {
+      $files[$name] = $this->executeCommand('which ' . $name);
+    }
+
+    return $files[$name];
   }
 
   /**
@@ -382,16 +532,64 @@ EOT
   }
 
   /**
+   * Convert array of CLI options to a string suitable for command.
+   *
+   * @param array $options
+   *   Array of options with option names as keys and option values as values.
+   *   Any single-letter option names are considered options shorthand (-a).
+   *
+   * @return string
+   *   String suitable for command.
+   */
+  protected function commandOptionsStringify($options) {
+    $output = array();
+    foreach ($options as $option => $value) {
+      // Options shorthand.
+      if (strlen($option) == 1) {
+        $output[] = is_null($value) ? '-' . $option : '-' . $option . ' ' . $value;
+      }
+      // Full options.
+      else {
+        $output[] = is_null($value) ? '--' . $option : '--' . $option . '=' . $value;
+      }
+    }
+
+    return implode(' ', $output);
+  }
+
+  /**
    * Output results, including sending emails.
    *
    * @param OutputInterface $output
    */
   protected function outputResults($results, OutputInterface $output) {
+    $output->write("\n");
+    $output->write(implode("\n", $results));
   }
 
-  protected function produceReports() {
+  /**
+   * Produce reports.
+   *
+   * @param array $results
+   *   Array of review results.
+   * @param string $filename
+   *   Report filename.
+   * @param bool $multiple_files
+   *   Optional flag to store reports as multiple files.
+   */
+  protected function produceReports($results, $filename, $multiple_files = FALSE) {
+    // @todo: Implement this.
   }
 
-  protected function sendMail() {
+  /**
+   * Send mail to committers.
+   *
+   * @param $results
+   *   Array of results.
+   * @param array $options
+   *   Array of sendmail options.
+   */
+  protected function sendMail($results, $options) {
+    // @todo: Implement this.
   }
 }
