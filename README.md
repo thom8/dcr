@@ -1,4 +1,4 @@
-# Drupal Code Review (DCR) [![Build Status](https://travis-ci.org/alexdesignworks/drupal-code-review.svg?branch=master)](https://travis-ci.org/alexdesignworks/drupal-code-review)
+# Drupal Code Review (DCR) [![Circle CI](https://circleci.com/gh/alexdesignworks/drupal-code-review.svg?style=svg)](https://circleci.com/gh/alexdesignworks/drupal-code-review)
 
 # Please note that this project is not at release stage yet.
 # The work on this is planned to be finished by 10th of August, 2015

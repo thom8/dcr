@@ -58,7 +58,7 @@
   "scripts": {
     "post-install-cmd": [
       "/bin/cat vendor/douglascrockford/JSLint/jslint.js jslint/rhino.js>jslint/ultimatejslint.js",
-      "if /bin/cat ~/.profile | /bin/grep -ohq \"PATH=\\$PATH:\\.\"; then echo \"  Current dir (.) is already in PATH\"; else echo PATH=\\$PATH:.>>~/.profile; . ~/.profile; echo \"  Added current dir (.)\" to PATH; fi",
+      "bindir=$(pwd)/vendor/bin && if /bin/cat ~/.profile | /bin/grep -ohq \"PATH=\\$PATH:$bindir\"; then echo \"  Bin directory $bindir is already in PATH\"; else echo PATH=\\$PATH:$bindir>>~/.profile; . ~/.profile; echo \"  Added bin directory $bindir\" to PATH; fi",
       "sudo chmod 0775 dcr",
       "echo",
       "echo \"  Run 'dcr' or 'dcr --help' for advanced dcr usage\""

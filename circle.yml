@@ -1,6 +1,8 @@
 machine:
   php:
     version: 5.3.10
+  environment:
+   PATH: ${PATH}:${HOME}/${CIRCLE_PROJECT_REPONAME}/vendor/bin
 
 dependencies:
   pre:
@@ -14,7 +16,7 @@ dependencies:
   # Refresh environment variables.
   - phpenv rehash
   # Run installation of all dependencies unsing composer.
-  - composer install
+  - cd $HOME/$CIRCLE_PROJECT_REPONAME && composer install
 
 test:
   override:

@@ -10,8 +10,16 @@
   ls vendor/bin/phpcs
 }
 
+@test "phpcs binary available in current session" {
+  command -v phpcs
+}
+
 @test "phpcbf binary present" {
   ls vendor/bin/phpcbf
+}
+
+@test "phpcbf binary available in current session" {
+  command -v phpcbf
 }
 
 @test "Drupal package present" {
@@ -39,7 +47,7 @@
 }
 
 @test "phpunit is available in current session" {
-  command -v ./vendor/phpunit/phpunit/phpunit
+  command -v phpunit
 }
 
 @test "phpunit version is the same as specified in composer config" {
