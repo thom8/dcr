@@ -406,7 +406,7 @@ EOT
   protected function binaryFilenameLookup($name) {
     static $files = array();
     if (!isset($files[$name])) {
-      $files[$name] = $this->executeCommand('which ' . $name);
+      $files[$name] = $this->executeCommand('which ' . $name, 'Unable to find full path for command ' . $name);
     }
 
     return $files[$name];
@@ -541,16 +541,19 @@ EOT
    *
    * @param string $command
    *   Command to execute.
+   * @param string $error_message
+   *   Optional error message to pass to exception if command fails.
    *
-   * @return string
-   *   Command output.
+   * @return string Command output.
+   * Command output.
    */
-  protected function executeCommand($command) {
+  protected function executeCommand($command, $error_message = '') {
     $process = new Process($command);
     $process->run();
 
     if (!$process->isSuccessful()) {
-      throw new \RuntimeException($process->getErrorOutput());
+      $error_message = empty($error_message) ? $process->getErrorOutput() : $error_message;
+      throw new \RuntimeException($error_message);
     }
 
     return trim($process->getOutput());
