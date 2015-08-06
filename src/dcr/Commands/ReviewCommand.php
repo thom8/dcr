@@ -404,12 +404,13 @@ EOT
    *   Absolute path for binary or FALSE if binary was not found.
    */
   protected function binaryFilenameLookup($name) {
-    static $files = array();
-    if (!isset($files[$name])) {
-      $files[$name] = $this->executeCommand('which ' . $name, 'Unable to find full path for command ' . $name);
-    }
-
-    return $files[$name];
+//    static $files = array();
+//    if (!isset($files[$name])) {
+//      $files[$name] = $this->executeCommand('which ' . $name, 'Unable to find full path for command ' . $name);
+//    }
+//
+//    return $files[$name];
+    return $name;
   }
 
   /**
