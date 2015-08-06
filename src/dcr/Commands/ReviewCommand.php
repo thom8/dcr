@@ -41,7 +41,7 @@ class ReviewCommand extends Command {
   /**
    * Defines application error code.
    */
-  const EXIT_CODE_APPLICATION_ERROR = 255;
+  const EXIT_CODE_APPLICATION_ERROR = 127;
 
   /**
    * @var int
@@ -366,7 +366,7 @@ EOT
 
     // Track review result separately to any other phpcs application errors.
     if ($exit_code != self::EXIT_CODE_REVIEW_SUCCESS && $exit_code != self::EXIT_CODE_REVIEW_FAILED) {
-      throw new \RuntimeException('Error occurred while performing file ' . $file . ' review.');
+      throw new \RuntimeException('Error occurred while performing file ' . $file . ' review. ' . $process->getOutput());
     }
 
     return array(
