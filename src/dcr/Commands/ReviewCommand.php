@@ -186,7 +186,7 @@ EOT
       }
       else {
         // Skip this incorrect source.
-        // @todo: Add proper exception throwing here.
+        throw new \RuntimeException('Unable to find review source file ' . $source);
       }
     }
 
