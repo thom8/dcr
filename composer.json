@@ -39,6 +39,7 @@
     }
   ],
   "require": {
+    "php": ">=5.3.9",
     "symfony/console": "2.6.5",
     "symfony/finder": "2.7.0",
     "symfony/process": "2.7.0",
@@ -64,5 +65,8 @@
       "echo",
       "echo \"  Run 'dcr' or 'dcr --help' for advanced dcr usage\""
     ]
-  }
+  },
+  "bin": [
+    "dcr"
+  ]
 }
