@@ -17,7 +17,7 @@ dependencies:
   - phpenv rehash
   # Run installation of all dependencies unsing composer.
   - cd $HOME/$CIRCLE_PROJECT_REPONAME && composer install
-  - cd $HOME/$CIRCLE_PROJECT_REPONAME && /vendor/bin/dcr install
+  - cd $HOME/$CIRCLE_PROJECT_REPONAME && vendor/bin/dcr install
 
 test:
   override:
