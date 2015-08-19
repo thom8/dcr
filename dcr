@@ -4,7 +4,14 @@
 #
 # A lightweight wrapper around phpcs.
 #
-# dcr --help for usage.
+# Installation:
+# 1. Pull all dependecies:
+# composer global require alexdesignworks/drupal-code-review
+# 2. Link and copy required files (composer does not let to execute scripts):
+# ~/.console/vendor/bin/dcr install
+#
+# Usage: dcr --help for usage.
+#
 
 CURRENT_DIR=$(pwd)
 DCR_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
