@@ -6,7 +6,7 @@
     "drupal/coder": "~8.2"
   },
   "scripts": {
-    "post-install-cmd": [
+    "post-dependencies-solving": [
       "bindir=$HOME/.composer/vendor/bin && if /bin/cat ~/.profile | /bin/grep -ohq \"PATH=\\$PATH:$bindir\\$\"; then echo \"  DCR bin directory $bindir is already in PATH\"; else echo PATH=\\$PATH:$bindir>>~/.profile; . ~/.profile; echo \"  Added DCR bin directory $bindir\" to PATH; fi",
       "sudo chmod 0775 dcr",
       "phpcs --config-set installed_paths ~/.composer/vendor/drupal/coder/coder_sniffer",
