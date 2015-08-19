@@ -7,7 +7,7 @@
   },
   "scripts": {
     "post-install-cmd": [
-      "bindir=$($HOME/.composer/vendor/bin) && if /bin/cat ~/.profile | /bin/grep -ohq \"PATH=\\$PATH:$bindir\\$\"; then echo \"  DCR bin directory $bindir is already in PATH\"; else echo PATH=\\$PATH:$bindir>>~/.profile; . ~/.profile; echo \"  Added DCR bin directory $bindir\" to PATH; fi",
+      "bindir=$HOME/.composer/vendor/bin && if /bin/cat ~/.profile | /bin/grep -ohq \"PATH=\\$PATH:$bindir\\$\"; then echo \"  DCR bin directory $bindir is already in PATH\"; else echo PATH=\\$PATH:$bindir>>~/.profile; . ~/.profile; echo \"  Added DCR bin directory $bindir\" to PATH; fi",
       "sudo chmod 0775 dcr",
       "echo",
       "echo \"  Run 'dcr' or 'dcr --help' for advanced dcr usage\""

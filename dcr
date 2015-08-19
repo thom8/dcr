@@ -1,0 +1,86 @@
+#!/bin/bash
+#
+# Drupal Code Review
+#
+# A lightweight wrapper around phpcs.
+#
+# dcr --help for usage.
+#
+# Install phpcs from https://www.drupal.org/node/1419988
+
+# Default values. Could be overwritten by options with the same names from cli.
+TARGETS="\
+sites/default/settings.php* \
+sites/all/modules/custom \
+sites/all/themes/custom \
+"
+EXTENSIONS="module,install,profile,php,theme,inc"
+
+# Comma-separated list of available standards.
+STANDARDS="Drupal,DrupalPractice"
+
+################################################################################
+### DO NOT CHANGE ANYTHING BELOW THIS LINE UNLESS YOU KNOW WHAT YOU ARE DOING ##
+################################################################################
+
+#
+# Help message output.
+#
+function show_help() {
+  echo "Drupal Code Review"
+  echo
+  echo "Usage:"
+  echo "dcr [--explain] [--brief] [*phpcs options] [<file or dir>]"
+  echo
+  echo "--explain       Show sniff codes oin all reports"
+  echo "--brief         Show check progress only (no report). Usefull for CI."
+  echo "*phpcs options  Any phpcs options ('phpcs --help' for options list)."
+  echo "file or dir     Custom file or directory to check."
+}
+
+#
+# Main entry point.
+#
+function main () {
+  custom_options=""
+  passthrough_option="--colors"
+  passthrough_targets=""
+
+  for i in "$@"
+  do
+    case $i in
+      --help)
+      show_help
+      return
+      ;;
+      --explain)
+      custom_options="${custom_options} -s"
+      shift # past argument with no value
+      ;;
+      --brief)
+      custom_options="${custom_options} -p --report-file=/dev/null"
+      shift # past argument with no value
+      ;;
+      *)
+      # Passthrough all unknown options.
+      if [ "${i:0:1}" == "-" ] || [ "${i:0:2}" == "--" ]; then
+        passthrough_option="${passthrough_option} ${i}"
+      else
+        passthrough_targets="${passthrough_targets} ${i}"
+      fi
+      shift
+      ;;
+    esac
+  done
+
+  # Re-write targets if custom ones where passed to this script.
+  if [ "$passthrough_targets" == "" ] ; then
+    passthrough_targets=${TARGETS}
+  fi
+
+  # Pass-through options always override any default and custom options.
+  phpcs --standard=$STANDARDS --extensions=$EXTENSIONS $custom_options $passthrough_option $passthrough_targets
+  return $?
+}
+
+main "$@"
