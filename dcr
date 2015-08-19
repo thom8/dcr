@@ -5,22 +5,15 @@
 # A lightweight wrapper around phpcs.
 #
 # dcr --help for usage.
-#
-# Install phpcs from https://www.drupal.org/node/1419988
 
-# Default values. Could be overwritten by options with the same names from cli.
-TARGETS="\
-sites/all/modules/custom \
-sites/all/themes/custom \
-"
-EXTENSIONS="module,install,profile,php,theme,inc"
+CURRENT_DIR=$(pwd)
+DCR_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+CONF="dcr4.conf"
+EXAMPLE_CONF="example.dcr.conf"
 
-# Comma-separated list of available standards.
-STANDARDS="Drupal,DrupalPractice"
-
-################################################################################
-### DO NOT CHANGE ANYTHING BELOW THIS LINE UNLESS YOU KNOW WHAT YOU ARE DOING ##
-################################################################################
+TARGETS=""
+EXTENSIONS=""
+STANDARDS=""
 
 #
 # Help message output.
@@ -40,7 +33,7 @@ function show_help() {
 #
 # Main entry point.
 #
-function main () {
+function main() {
   custom_options=""
   passthrough_option="--colors"
   passthrough_targets=""
@@ -50,6 +43,10 @@ function main () {
     case $i in
       --help)
       show_help
+      return
+      ;;
+      install)
+      install
       return
       ;;
       --explain)
@@ -72,6 +69,17 @@ function main () {
     esac
   done
 
+  # Read config from the file.
+  conf_file=$CURRENT_DIR/$CONF
+  if [ ! -f $conf_file ] ; then
+    echo "Unable to open DCR config file $conf_file. Please copy $DCR_DIR/$EXAMPLE_CONF to $conf_file."
+    return 1
+  fi
+
+  # Include configuration from file.
+  source $conf_file
+
+
   # Re-write targets if custom ones where passed to this script.
   if [ "$passthrough_targets" == "" ] ; then
     passthrough_targets=${TARGETS}
@@ -80,6 +88,45 @@ function main () {
   # Pass-through options always override any default and custom options.
   phpcs --standard=$STANDARDS --extensions=$EXTENSIONS $custom_options $passthrough_option $passthrough_targets
   return $?
+}
+
+#
+# Additional installation steps.
+#
+function install() {
+  # Add bin to PATH.
+  if [ -d vendor/bin ] ; then
+    bindir=$(pwd)/vendor/bin
+  else
+    bindir=$HOME/.composer/vendor/bin
+  fi
+
+  if /bin/cat ~/.profile | /bin/grep -ohq "PATH=$bindir:\$PATH\$"; then
+    echo "DCR bin directory $bindir is already in PATH";
+  else
+    echo "PATH=$bindir:\$PATH" >> $HOME/.profile;
+    echo "Added DCR bin directory $bindir to PATH";
+  fi
+  . $HOME/.profile;
+
+  # Add code sniffer path to phpcs config.
+  phpcs=$(which phpcs)
+
+  if [[ "$phpcs" =~ "vendor" ]]; then
+    phpcs --config-set installed_paths ~/.composer/vendor/drupal/coder/coder_sniffer
+  else
+    echo "Incorrect phpcs is in use. Make sure that phpcs is available in this session."
+    return 1
+  fi
+
+  # Copy config file.
+  conf_file=$CURRENT_DIR/$CONF
+  if [ -f $conf_file ] ; then
+    echo "Skipping copying of config file - file $conf_file exists."
+  else
+    cp $DCR_DIR/$EXAMPLE_CONF $conf_file
+    echo "Copied example config file $DCR_DIR/$EXAMPLE_CONF to $conf_file."
+  fi
 }
 
 main "$@"
