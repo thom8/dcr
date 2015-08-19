@@ -1,0 +1,10 @@
+#
+# DCR configuration file example.
+#
+
+# Space (!) separated list of files or directories to scan.
+targets: "sites/all/modules/custom sites/all/themes/custom"
+# Comma-separated list of extensions to scan.
+extensions: "module,install,profile,php,theme,inc"
+# Comma-separated list of available standards.
+standards: "Drupal,DrupalPractice"

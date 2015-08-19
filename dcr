@@ -8,8 +8,8 @@
 
 CURRENT_DIR=$(pwd)
 DCR_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-CONF="dcr4.conf"
-EXAMPLE_CONF="example.dcr.conf"
+CONF=".dcr.yml"
+EXAMPLE_CONF="example.dcr.yml"
 
 TARGETS=""
 EXTENSIONS=""
@@ -76,17 +76,31 @@ function main() {
     return 1
   fi
 
-  # Include configuration from file.
-  source $conf_file
+  # Include configuration from YAML file.
+  eval $(parse_yaml $conf_file "conf_")
 
+  # Validate and set parameters.
+  if [ ${conf_extensions+x} ] ; then
+    custom_options="--extensions=$conf_extensions $custom_options"
+  fi
+
+  if [ ${conf_standards+x} ] ; then
+    custom_options="--standard=$conf_standards $custom_options"
+  fi
 
   # Re-write targets if custom ones where passed to this script.
   if [ "$passthrough_targets" == "" ] ; then
-    passthrough_targets=${TARGETS}
+    # Check that targets were provided in cofig.
+    if [ ${conf_targets+x} ] ; then
+      passthrough_targets=$conf_targets
+    else
+      echo "No targets were provided"
+      return 1
+    fi
   fi
 
   # Pass-through options always override any default and custom options.
-  phpcs --standard=$STANDARDS --extensions=$EXTENSIONS $custom_options $passthrough_option $passthrough_targets
+  phpcs $custom_options $passthrough_option $passthrough_targets
   return $?
 }
 
@@ -127,6 +141,25 @@ function install() {
     cp $DCR_DIR/$EXAMPLE_CONF $conf_file
     echo "Copied example config file $DCR_DIR/$EXAMPLE_CONF to $conf_file."
   fi
+}
+
+#
+# Simple key/value YAML parser.
+#
+parse_yaml() {
+   local prefix=$2
+   local s='[[:space:]]*' w='[a-zA-Z0-9_]*' fs=$(echo @|tr @ '\034')
+   sed -ne "s|^\($s\)\($w\)$s:$s\"\(.*\)\"$s\$|\1$fs\2$fs\3|p" \
+        -e "s|^\($s\)\($w\)$s:$s\(.*\)$s\$|\1$fs\2$fs\3|p"  $1 |
+   awk -F$fs '{
+      indent = length($1)/2;
+      vname[indent] = $2;
+      for (i in vname) {if (i > indent) {delete vname[i]}}
+      if (length($3) > 0) {
+         vn=""; for (i=0; i<indent; i++) {vn=(vn)(vname[i])("_")}
+         printf("%s%s%s=\"%s\"\n", "'$prefix'",vn, $2, $3);
+      }
+   }'
 }
 
 main "$@"
