@@ -78,13 +78,16 @@ function main() {
 
   # Read config from the file.
   conf_file=$CURRENT_DIR/$CONF
-  if [ ! -f $conf_file ] ; then
+  # Error if no pass-through targets provided and config does not exist.`
+  if [ ! -f $conf_file ] && [ "$passthrough_targets" == "" ] ; then
     echo "Unable to open DCR config file $conf_file. Please copy $DCR_DIR/$EXAMPLE_CONF to $conf_file."
     return 1
   fi
 
-  # Include configuration from YAML file.
-  eval $(parse_yaml $conf_file "conf_")
+  # But try to include config for pass-through targets to use config  from file.
+  if [ -f $conf_file ] ; then
+    eval $(parse_yaml $conf_file "conf_")
+  fi
 
   # Validate and set parameters.
   if [ ${conf_extensions+x} ] ; then
