@@ -17,3 +17,6 @@ boxes/*
 vendor
 composer.lock
 ultimatejslint.js
+
+# Exclude project-based configuration.
+.dcr.yml
