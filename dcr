@@ -10,7 +10,6 @@
 
 # Default values. Could be overwritten by options with the same names from cli.
 TARGETS="\
-sites/default/settings* \
 sites/all/modules/custom \
 sites/all/themes/custom \
 "
