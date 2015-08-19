@@ -26,15 +26,6 @@
   ls vendor/drupal/coder/coder_sniffer/Drupal/ruleset.xml
 }
 
-@test "phpunit is available in current session" {
-  command -v phpunit
-}
-
-@test "phpunit version is the same as specified in composer config" {
-  run ./vendor/phpunit/phpunit/phpunit --version
-  [ "${lines[0]}" = "PHPUnit 4.6.6 by Sebastian Bergmann and contributors." ]
-}
-
 @test "dcr command available in current session" {
-  command -v ./dcr
+  command -v dcr
 }
