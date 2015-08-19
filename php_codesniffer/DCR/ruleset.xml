@@ -12,14 +12,12 @@
   -->
   <rule ref="vendor/drupal/coder/coder_sniffer/Drupal"/>
   <rule ref="vendor/drupal/coder/coder_sniffer/DrupalPractice"/>
-  <rule ref="vendor/coltrane/DrupalSecure/DrupalSecure"/>
   <rule ref="Squiz.WhiteSpace.FunctionOpeningBraceSpace"/>
 
   <!--
     Include custom DCR standards.
   -->
   <rule ref="DCR.WhiteSpace.FunctionClosingBraceSpace"/>
-  <rule ref="DCR.Debug.JSLint"/>
   <!--
     Replace line length check sniff with slightly customised sniff that
     respects commented code. These are the comments preceded by the line with
@@ -191,14 +189,6 @@
   -->
   <rule ref="DrupalPractice.General.FormStateInput.Input">
     <exclude-pattern>*\.views\.inc*</exclude-pattern>
-  </rule>
-
-  <!--
-    Disable SQL Injection checking in some files.
-  -->
-  <rule ref="DrupalSecure.General.Helper.SQLi.dbQuery">
-    <!--.install files-->
-    <exclude-pattern>*\.install$</exclude-pattern>
   </rule>
 
   <!--
