@@ -14,7 +14,8 @@
 #
 
 CURRENT_DIR=$(pwd)
-DCR_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+DCR_BIN_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+DCR_DIR="$(dirname "$(readlink -f "$0")")"
 CONF=".dcr.yml"
 EXAMPLE_CONF="example.dcr.yml"
 
@@ -119,11 +120,7 @@ function main() {
 #
 function install() {
   # Add bin to PATH.
-  if [ -d vendor/bin ] ; then
-    bindir=$(pwd)/vendor/bin
-  else
-    bindir=$HOME/.composer/vendor/bin
-  fi
+  bindir=$DCR_BIN_DIR
 
   if /bin/cat ~/.profile | /bin/grep -ohq "PATH=$bindir:\$PATH\$"; then
     echo "DCR bin directory $bindir is already in PATH";
