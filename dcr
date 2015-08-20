@@ -53,6 +53,10 @@ function main() {
       show_help
       return
       ;;
+      install)
+      install
+      return
+      ;;
       --explain)
       custom_options="${custom_options} -s"
       shift # past argument with no value
@@ -124,6 +128,7 @@ function install() {
     echo "PATH=$bindir:\$PATH" >> $HOME/.profile;
     echo "Added DCR bin directory $bindir to PATH";
   fi
+  . $HOME/.profile;
 
   # Add code sniffer path to phpcs config.
   phpcs=$(which phpcs)
@@ -164,11 +169,4 @@ parse_yaml() {
    }'
 }
 
-# Special case for installation command as we would need to reload .profile
-# to make this command available.
-if [ "$1" == "install" ] ; then
-  install
-  source $HOME/.profile;
-else
-  main "$@"
-fi
+main "$@"
