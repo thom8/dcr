@@ -29,6 +29,9 @@ STANDARDS=""
 function show_help() {
   echo "Drupal Code Review"
   echo
+  echo "Installation:"
+  echo "dcr install && . ~/.profile"
+  echo
   echo "Usage:"
   echo "dcr [--explain] [--brief] [*phpcs options] [<file or dir>]"
   echo
@@ -128,7 +131,6 @@ function install() {
     echo "PATH=$bindir:\$PATH" >> $HOME/.profile;
     echo "Added DCR bin directory $bindir to PATH";
   fi
-  . $HOME/.profile;
 
   # Add code sniffer path to phpcs config.
   phpcs=$(which phpcs)
@@ -148,6 +150,9 @@ function install() {
     cp $DCR_DIR/$EXAMPLE_CONF $conf_file
     echo "Copied example config file $DCR_DIR/$EXAMPLE_CONF to $conf_file."
   fi
+
+  echo
+  echo "Please run . ~/.profile to make dcr available in current session"
 }
 
 #
