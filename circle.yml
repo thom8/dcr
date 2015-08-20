@@ -18,9 +18,9 @@ dependencies:
   # Run installation of all dependencies unsing composer.
   - cd $HOME/$CIRCLE_PROJECT_REPONAME && composer install
   # Run a second part of the installation to link all required parts.
-  - cd $HOME/$CIRCLE_PROJECT_REPONAME && bash dcr install && . ~/.profile
+  - cd $HOME/$CIRCLE_PROJECT_REPONAME && bash dcr install
 
 test:
   override:
   # Run environment tests.
-  - bats tests/bats/environment.bats
+  - source ~/.profile && bats tests/bats/environment.bats
