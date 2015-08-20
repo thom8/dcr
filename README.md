@@ -1,7 +1,6 @@
 # Drupal Code Review (DCR) [![Circle CI](https://circleci.com/gh/alexdesignworks/dcr.svg?style=svg)](https://circleci.com/gh/alexdesignworks/dcr)
 
 # Please note that this project is not at release stage yet.
-# The work on this is planned to be finished by 10th of August, 2015
 
 ## What is it?
 Drupal Code Review (DCR) is a command-line utility to check that produced code follows Drupal coding standards and best practices.
