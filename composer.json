@@ -1,5 +1,5 @@
 {
-  "name": "alexdesignworks/drupal-code-review",
+  "name": "alexdesignworks/dcr",
   "minimum-stability": "dev",
   "require": {
     "php": ">=5.3.9",

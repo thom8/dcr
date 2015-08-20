@@ -6,9 +6,9 @@
 #
 # Installation:
 # 1. Pull all dependecies:
-# composer global require alexdesignworks/drupal-code-review
+# composer global require alexdesignworks/dcr
 # 2. Link and copy required files (composer does not let to execute scripts):
-# ~/.console/vendor/bin/dcr install
+# ~/.console/vendor/bin/dcr install && ~/.profile
 #
 # Usage: dcr --help for usage.
 #
@@ -26,6 +26,7 @@ function show_help() {
   echo "Drupal Code Review"
   echo
   echo "Installation:"
+  echo "composer global require alexdesignworks/dcr"
   echo "dcr install && . ~/.profile"
   echo
   echo "Usage:"
