@@ -14,7 +14,8 @@
 #
 
 CURRENT_DIR=$(pwd)
-DCR_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+DCR_DIR="$(dirname -- "$(readlink -f -- "$0")")"
+VENDOR_DIR="$(dirname $(dirname $DCR_DIR))"
 
 CONF=".dcr.yml"
 EXAMPLE_CONF="example.dcr.yml"
@@ -85,7 +86,7 @@ function main() {
     return 1
   fi
 
-  # But try to include config for pass-through targets to use config  from file.
+  # But try to include config for pass-through targets to use config from file.
   if [ -f $conf_file ] ; then
     eval $(parse_yaml $conf_file "conf_")
   fi
@@ -129,11 +130,11 @@ function install() {
     echo "Added DCR bin directory $bindir to PATH";
   fi
 
-  # Add code sniffer path to phpcs config.
+  # Add code sniffer install path to phpcs config to allow proper stadnards
+  # path resolution. This also handles paths for global and local installation.
   phpcs=$(which phpcs)
-
   if [[ "$phpcs" =~ "vendor" ]]; then
-    phpcs --config-set installed_paths ~/.composer/vendor/drupal/coder/coder_sniffer
+    phpcs --config-set installed_paths $VENDOR_DIR
   else
     echo "Incorrect phpcs is in use. Make sure that phpcs is available in this session."
     return 1
