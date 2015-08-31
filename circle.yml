@@ -15,7 +15,7 @@ dependencies:
   override:
   # Refresh environment variables.
   - phpenv rehash
-  # Run installation of all dependencies unsing composer.
+  # Run installation of all dependencies unsing composer locally.
   - cd $HOME/$CIRCLE_PROJECT_REPONAME && composer config -g github-oauth.github.com $GITHUB_TOKEN
   - cd $HOME/$CIRCLE_PROJECT_REPONAME && composer install
   # Run a second part of the installation to link all required parts.

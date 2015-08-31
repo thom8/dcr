@@ -22,7 +22,6 @@
 
 CURRENT_DIR=$(pwd)
 DCR_DIR="$(dirname -- "$(readlink -f -- "$0")")"
-VENDOR_DIR="$(dirname $(dirname $DCR_DIR))"
 
 CONF=".dcr.yml"
 EXAMPLE_CONF="example.dcr.yml"
@@ -55,7 +54,7 @@ function show_help() {
 #
 function main() {
   custom_options=""
-  passthrough_option="--colors"
+  passthrough_options="--colors"
   passthrough_targets=""
 
   for i in "$@"
@@ -80,7 +79,7 @@ function main() {
       *)
       # Passthrough all unknown options.
       if [ "${i:0:1}" == "-" ] || [ "${i:0:2}" == "--" ]; then
-        passthrough_option="${passthrough_option} ${i}"
+        passthrough_options="${passthrough_options} ${i}"
       else
         passthrough_targets="${passthrough_targets} ${i}"
       fi
@@ -116,14 +115,14 @@ function main() {
     # Check that targets were provided in cofig.
     if [ ${conf_targets+x} ] ; then
       passthrough_targets=$conf_targets
-    else
+    elif [ ! ${passthrough_options+x} ] && [ ! ${custom_options+x} ] ; then
       echo "No targets were provided"
       return 1
     fi
   fi
 
   # Pass-through options always override any default and custom options.
-  phpcs $custom_options $passthrough_option $passthrough_targets
+  phpcs $custom_options $passthrough_options $passthrough_targets
   return $?
 }
 
@@ -131,13 +130,27 @@ function main() {
 # Additional installation steps.
 #
 function install() {
-  # Add bin to PATH.
-  bindir=$DCR_DIR
+  # Check if DCR ran as dependenci (installed into vendor dir) or as an app
+  # by itself (for dcr development).
+  if [[ "$DCR_DIR" =~ "vendor" ]]; then
+    vendor_dir="$(dirname $(dirname $DCR_DIR))"
+  else
+    vendor_dir="$DCR_DIR/vendor"
+  fi
+  bindir="${vendor_dir}/bin"
+
+  # Additnially, symlink dcr into vendor bin.
+  if [ ! -L "${bindir}/dcr" ] ; then
+    ln -s $DCR_DIR/dcr ${bindir}/dcr
+    ln -s $DCR_DIR/dcr $HOME/bin/dcr
+    echo "Symlinked dcr into ${bindir}"
+  fi
 
   if /bin/cat ~/.profile | /bin/grep -ohq "PATH=$bindir:\$PATH\$"; then
     echo "DCR bin directory $bindir is already in PATH";
   else
     echo "PATH=$bindir:\$PATH" >> $HOME/.profile;
+    . $HOME/.profile
     echo "Added DCR bin directory $bindir to PATH";
   fi
 
@@ -145,7 +158,7 @@ function install() {
   # path resolution. This also handles paths for global and local installation.
   phpcs=$(which phpcs)
   if [[ "$phpcs" =~ "vendor" ]]; then
-    phpcs --config-set installed_paths $VENDOR_DIR
+    phpcs --config-set installed_paths $vendor_dir
   else
     echo "Incorrect phpcs is in use. Make sure that phpcs is available in this session."
     return 1
