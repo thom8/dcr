@@ -25,3 +25,5 @@ test:
   override:
   # Run environment tests.
   - source ~/.profile && bats tests/bats/environment.bats
+  # Run app tests.
+  - source ~/.profile && bats tests/bats/app.bats
