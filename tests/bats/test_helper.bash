@@ -58,6 +58,20 @@ assert_equal() {
 }
 
 #
+# Contains assertion.
+#
+assert_contains() {
+  if [[ "$2" =~ "$1" ]] ; then
+    /bin/true
+  else
+    { echo "string:   $2"
+      echo "contains: $1"
+    } | flunk
+  fi
+}
+
+
+#
 # Assertion output.
 #
 assert_output() {
