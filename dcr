@@ -4,11 +4,18 @@
 #
 # A lightweight wrapper around phpcs.
 #
-# Installation:
+# Installation (global):
 # 1. Pull all dependecies:
 # composer global require alexdesignworks/dcr
 # 2. Link and copy required files (composer does not let to execute scripts):
 # ~/.console/vendor/bin/dcr install && ~/.profile
+#
+# Installation (local):
+# 1. Pull all dependecies:
+# composer require alexdesignworks/dcr
+# 2. Link and copy required files (composer does not let to execute scripts):
+# vendor/bin/dcr install && ~/.profile
+#
 #
 # Usage: dcr --help for usage.
 #
@@ -26,8 +33,12 @@ EXAMPLE_CONF="example.dcr.yml"
 function show_help() {
   echo "Drupal Code Review"
   echo
-  echo "Installation:"
+  echo "Installation (global):"
   echo "composer global require alexdesignworks/dcr"
+  echo "dcr install && . ~/.profile"
+  echo
+  echo "Installation (local):"
+  echo "composer require alexdesignworks/dcr"
   echo "dcr install && . ~/.profile"
   echo
   echo "Usage:"
