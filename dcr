@@ -20,11 +20,21 @@
 # Usage: dcr --help for usage.
 #
 
-CURRENT_DIR=$(pwd)
-DCR_DIR="$(dirname -- "$(readlink -f -- "$0")")"
+# Array of known standards paths within vendor directory.
+ # Use 'dcr -i' to check which standards are available.
+STANDARDS_PATHS=(
+ drupal/coder/coder_sniffer
+)
 
+# Configuation file name.
 CONF=".dcr.yml"
+# Configuation example file name.
 EXAMPLE_CONF="example.dcr.yml"
+
+# Current directory where dcr was invoked at.
+CURRENT_DIR=$(pwd)
+# dcr file location directory.
+DCR_DIR="$(dirname -- "$(readlink -f -- "$0")")"
 
 #
 # Help message output.
@@ -158,7 +168,28 @@ function install() {
   # path resolution. This also handles paths for global and local installation.
   phpcs=$(which phpcs)
   if [[ "$phpcs" =~ "vendor" ]]; then
-    phpcs --config-set installed_paths $vendor_dir
+    installed_paths=""
+
+    # Traverse all known sniffs locations and check for their existance before
+    # setting.
+    count=0
+    while [ "x${STANDARDS_PATHS[count]}" != "x" ]
+    do
+       standard_path=$vendor_dir/${STANDARDS_PATHS[count]}
+       if [ -d $standard_path ] ; then
+        installed_paths=${installed_paths},${standard_path}
+       fi
+       count=$(( $count + 1 ))
+    done
+
+    if [ "${installed_paths}" != "" ] ; then
+      # Remove leading comma.
+      installed_paths=${installed_paths:1}
+      phpcs --config-set installed_paths ${installed_paths}
+      echo "Set installed_path to ${installed_paths}."
+    else
+      echo "No valid standards' paths provided."
+    fi
   else
     echo "Incorrect phpcs is in use. Make sure that phpcs is available in this session."
     return 1

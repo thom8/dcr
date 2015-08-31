@@ -8,5 +8,5 @@
 targets: "sites/all/modules/custom sites/all/themes/custom"
 # Comma-separated list of extensions to scan.
 extensions: "module,install,profile,php,theme,inc"
-# Comma-separated list of available standards.
+# Comma-separated list of required standards to use.
 standards: "Drupal,DrupalPractice"
