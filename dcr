@@ -127,14 +127,17 @@ function main() {
   fi
 
   # Re-write targets if custom ones where passed to this script.
+  custom_targets=""
   if [ "$passthrough_targets" == "" ] ; then
     # Check that targets were provided in cofig.
     if [ ${conf_targets+x} ] ; then
-      passthrough_targets=$conf_targets
+      custom_targets=$conf_targets
     elif [ ! ${passthrough_options+x} ] && [ ! ${custom_options+x} ] ; then
       echo "No targets were provided"
       return 1
     fi
+  else
+    custom_targets=$passthrough_targets
   fi
 
   # Use custom parameters from config.
@@ -143,15 +146,19 @@ function main() {
   fi
 
   # Pass-through options always override any default and custom options.
-  phpcs $custom_options $passthrough_options $passthrough_targets
+  phpcs $custom_options $passthrough_options $custom_targets
   return_code=$?
 
-  if [ ${return_code} -eq 0 ] && [ ${conf_success+x} ] ; then
+  # Output success message, but only if it was set in config and this is not
+  # a non-targeted run.
+  if [ ${return_code} -eq 0 ] && [ ${conf_success+x} ] && [[ ! "${passthrough_options}" =~ "-i" ]] ; then
     echo
     cecho green "${conf_success}"
   fi
 
-  if [ ${return_code} -eq 1 ] && [ ${conf_fail+x} ] ; then
+  # Output fail message, but only if it was set in config and this is not
+  # a non-targeted run.
+  if [ ${return_code} -eq 1 ] && [ ${conf_fail+x} ] && [[ ! "${passthrough_options}" =~ "-i" ]] ; then
     echo
     cecho red "${conf_fail}"
   fi
