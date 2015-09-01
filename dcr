@@ -21,9 +21,15 @@
 #
 
 # Array of known standards paths within vendor directory.
- # Use 'dcr -i' to check which standards are available.
+# Use 'dcr -i' to check which standards are available.
+# Available tokens:
+# %vendor% - vendor directory.
+# %dcr% - dcr file location directory.
+# %current% - the directory where the script was invoked in.
 STANDARDS_PATHS=(
- drupal/coder/coder_sniffer
+  %vendor%/drupal/coder/coder_sniffer
+  %dcr%/php_codesniffer
+  %current%/dcr_standards
 )
 
 # Configuation file name.
@@ -180,7 +186,12 @@ function install() {
     count=0
     while [ "x${STANDARDS_PATHS[count]}" != "x" ]
     do
-       standard_path=$vendor_dir/${STANDARDS_PATHS[count]}
+       # Replace path tokens.
+       standard_path=${STANDARDS_PATHS[count]}
+       standard_path=$(echo ${standard_path} | sed -e "s?%vendor%?${vendor_dir}?g")
+       standard_path=$(echo ${standard_path} | sed -e "s?%dcr%?${DCR_DIR}?g")
+       standard_path=$(echo ${standard_path} | sed -e "s?%current%?${CURRENT_DIR}?g")
+
        if [ -d $standard_path ] ; then
         installed_paths=${installed_paths},${standard_path}
        fi

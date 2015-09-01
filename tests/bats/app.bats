@@ -12,7 +12,7 @@ setup() {
 
 @test "Custom vendor standards are picked up" {
   run dcr -i
-  assert_equal "The installed coding standards are MySource, PEAR, PHPCS, PSR1, PSR2, Squiz, Zend, Drupal and DrupalPractice" "$output"
+  assert_equal "The installed coding standards are MySource, PEAR, PHPCS, PSR1, PSR2, Squiz, Zend, Drupal, DrupalPractice, DCR and App" "$output"
 }
 
 @test "Single valid review passes" {
