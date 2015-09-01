@@ -187,6 +187,14 @@ function install() {
     echo "Added DCR bin directory $bindir to PATH";
   fi
 
+  # Add App standard directory to current dir to allow ruleset customisations.
+  if [ ! -d "${CURRENT_DIR}/dcr_standards" ] ; then
+    cp -r ${DCR_DIR}/dcr_standards ${CURRENT_DIR}
+    echo "Copied dcr_standards directory to ${CURRENT_DIR}"
+  else
+    echo "dcr_standards directory already exists at ${CURRENT_DIR}"
+  fi
+
   # Add code sniffer install path to phpcs config to allow proper stadnards
   # path resolution. This also handles paths for global and local installation.
   phpcs=$(which phpcs)
