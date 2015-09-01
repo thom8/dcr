@@ -170,28 +170,31 @@ function main() {
 # Additional installation steps.
 #
 function install() {
-  # Check if DCR ran as dependenci (installed into vendor dir) or as an app
+  # Check if DCR ran as dependency (installed into vendor dir) or as an app
   # by itself (for dcr development).
   if [[ "$DCR_DIR" =~ "vendor" ]]; then
-    vendor_dir="$(dirname $(dirname $DCR_DIR))"
+    root_dir="$(dirname $(dirname $(dirname $DCR_DIR)))"
   else
-    vendor_dir="$DCR_DIR/vendor"
+    root_dir="$DCR_DIR"
   fi
-  bindir="${vendor_dir}/bin"
+  vendor_dir=${root_dir}/vendor
+
+  # Get bin directory location from composer config.
+  bin_dir=${root_dir}/$(composer config bin-dir)
 
   # Additnially, symlink dcr into vendor bin.
-  if [ ! -L "${bindir}/dcr" ] ; then
-    ln -s $DCR_DIR/dcr ${bindir}/dcr
+  if [ ! -L "${bin_dir}/dcr" ] ; then
+    ln -s $DCR_DIR/dcr ${bin_dir}/dcr
     ln -s $DCR_DIR/dcr $HOME/bin/dcr
-    echo "Symlinked dcr into ${bindir}"
+    echo "Symlinked dcr into ${bin_dir}"
   fi
 
-  if /bin/cat ~/.profile | /bin/grep -ohq "PATH=$bindir:\$PATH\$"; then
-    echo "DCR bin directory $bindir is already in PATH";
+  if /bin/cat ~/.profile | /bin/grep -ohq "PATH=$bin_dir:\$PATH\$"; then
+    echo "DCR bin directory $bin_dir is already in PATH";
   else
-    echo "PATH=$bindir:\$PATH" >> $HOME/.profile;
+    echo "PATH=$bin_dir:\$PATH" >> $HOME/.profile;
     . $HOME/.profile
-    echo "Added DCR bin directory $bindir to PATH";
+    echo "Added DCR bin directory $bin_dir to PATH";
   fi
 
   # Add App standard directory to current dir to allow ruleset customisations.
@@ -205,7 +208,7 @@ function install() {
   # Add code sniffer install path to phpcs config to allow proper stadnards
   # path resolution. This also handles paths for global and local installation.
   phpcs=$(which phpcs)
-  if [[ "$phpcs" =~ "vendor" ]]; then
+  if [[ "$phpcs" == "$bin_dir/phpcs" ]]; then
     installed_paths=""
 
     # Traverse all known sniffs locations and check for their existance before
