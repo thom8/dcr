@@ -185,7 +185,6 @@ function install() {
   # Additnially, symlink dcr into vendor bin.
   if [ ! -L "${bin_dir}/dcr" ] ; then
     ln -s $DCR_DIR/dcr ${bin_dir}/dcr
-    ln -s $DCR_DIR/dcr $HOME/bin/dcr
     echo "Symlinked dcr into ${bin_dir}"
   fi
 
