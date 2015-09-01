@@ -64,7 +64,7 @@ function show_help() {
 #
 function main() {
   custom_options=""
-  passthrough_options="--colors"
+  passthrough_options=""
   passthrough_targets=""
 
   for i in "$@"
@@ -129,6 +129,11 @@ function main() {
       echo "No targets were provided"
       return 1
     fi
+  fi
+
+  # Use custom parameters from config.
+  if [ ${conf_parameters+x} ] ; then
+    custom_options="${custom_options} ${conf_parameters}"
   fi
 
   # Pass-through options always override any default and custom options.
