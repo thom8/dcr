@@ -28,11 +28,14 @@
     Replace line length check sniff with slightly customised sniff that
     respects commented code. These are the comments preceded by the line with
     @code and ended by the line with @endcode.
+    But exclude code generated in features.
   -->
   <rule ref="Drupal.Files.LineLength.TooLong">
     <exclude-pattern>*</exclude-pattern>
   </rule>
-  <rule ref="DCR.Files.LineLength.TooLong"/>
+  <rule ref="DCR.Files.LineLength.TooLong">
+    <exclude-pattern>*\.features\.*</exclude-pattern>
+  </rule>
 
   <!--
     Exclude puppet files.
