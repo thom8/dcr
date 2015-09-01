@@ -12,3 +12,7 @@ extensions: "module,install,profile,php,theme,inc"
 standards: "DCR"
 # Space-separated list of phpcs parameters to run dcr.
 parameters: "--colors"
+# Success result message.
+success: "All good! You're awesome!"
+# Fail result message.
+fail: "Please fix errors above and re-run dcr"
