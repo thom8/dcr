@@ -104,11 +104,13 @@ function main() {
     esac
   done
 
-  # Read config from the file.
-  conf_file=$CURRENT_DIR/$CONF
-  # Error if no pass-through targets provided and config does not exist.`
-  if [ ! -f $conf_file ] && [ "$passthrough_targets" == "" ] ; then
-    echo "Unable to open DCR config file $conf_file. Please copy $DCR_DIR/$EXAMPLE_CONF to $conf_file."
+  # Read config from the file. We allow file location in project root dir (the
+  # dir wehere `vendor` dir resides) or one dir above.
+  conf_file=$(get_conf_file)
+
+  # Error if config does not exist.
+  if [ "$conf_file" == "" ] ; then
+    echo "Unable to open DCR config file. Please copy $DCR_DIR/$EXAMPLE_CONF to project root."
     return 1
   fi
 
@@ -170,13 +172,7 @@ function main() {
 # Additional installation steps.
 #
 function install() {
-  # Check if DCR ran as dependency (installed into vendor dir) or as an app
-  # by itself (for dcr development).
-  if [[ "$DCR_DIR" =~ "vendor" ]]; then
-    root_dir="$(dirname $(dirname $(dirname $DCR_DIR)))"
-  else
-    root_dir="$DCR_DIR"
-  fi
+  root_dir=$(get_root_dir)
   vendor_dir=${root_dir}/vendor
 
   # Get bin directory location from composer config.
@@ -251,6 +247,51 @@ function install() {
 
   echo
   echo "Please run . ~/.profile to make dcr available in current session"
+}
+
+#
+# Get root dir (the dir where `vendor` dir resides).
+#
+get_root_dir() {
+  # Check if DCR ran as dependency (installed into vendor dir) or as an app
+  # by itself (for dcr development).
+  if [[ "$DCR_DIR" =~ "vendor" ]]; then
+    root_dir="$(dirname $(dirname $(dirname $DCR_DIR)))"
+  else
+    root_dir="$DCR_DIR"
+  fi
+
+  echo $root_dir
+}
+
+#
+# Get conf file location.
+#
+get_conf_file() {
+  root_dir=$(get_root_dir)
+  conf_files=(
+    # Current dir.
+    $CURRENT_DIR/$CONF
+    # Dir above current.
+    $(dirname $CURRENT_DIR)/$CONF
+    # Root dir.
+    $root_dir/$CONF
+    # Dir aove root.
+    $(dirname $root_dir)/$CONF
+  )
+  # Traverse all known config locations.
+  matched_conf_file=""
+  count=0
+  while [ "x${conf_files[count]}" != "x" ]
+  do
+    if [ -f "${conf_files[count]}" ] ; then
+      matched_conf_file=${conf_files[count]}
+      break
+    fi
+    count=$(( $count + 1 ))
+  done
+
+  echo $matched_conf_file
 }
 
 #
