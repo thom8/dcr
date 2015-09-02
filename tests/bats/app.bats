@@ -74,3 +74,15 @@ setup() {
   run dcr --standard=PSR1 $fixtures_dir/hooks.invalid.php
   assert_success
 }
+
+@test "Fixing code works" {
+  cp $fixtures_dir/hooks.invalid.php $fixtures_dir/hooks.invalid.tmp.php
+
+  # Run the code fixing.
+  run bash -c "dcr fix $fixtures_dir/hooks.invalid.tmp.php"
+
+  run diff $fixtures_dir/hooks.invalid.php $fixtures_dir/hooks.invalid.tmp.php
+  assert_failure
+
+  rm $fixtures_dir/hooks.invalid.tmp.php
+}

@@ -78,6 +78,7 @@ function main() {
   custom_options=""
   passthrough_options=""
   passthrough_targets=""
+  binary="phpcs"
 
   for i in "$@"
   do
@@ -89,6 +90,11 @@ function main() {
       install)
       install
       return
+      ;;
+      fix)
+      binary="phpcbf"
+      custom_options="${custom_options} --no-patch"
+      shift # past argument with no value
       ;;
       --explain)
       custom_options="${custom_options} -s"
@@ -166,22 +172,24 @@ function main() {
   # Pass-through options always override any default and custom options.
   root_dir=$(get_root_dir)
   cd $root_dir
-  phpcs $custom_options $passthrough_options $custom_targets
+  $binary $custom_options $passthrough_options $custom_targets
   return_code=$?
   cd $CURRENT_DIR
 
-  # Output success message, but only if it was set in config and this is not
-  # a non-targeted run.
-  if [ ${return_code} -eq 0 ] && [ ${conf_success+x} ] && [[ ! "${passthrough_options}" =~ "-i" ]] ; then
-    echo
-    cecho green "${conf_success}"
-  fi
+  if [ "$binary" == "phpcs" ] ; then
+    # Output success message, but only if it was set in config and this is not
+    # a non-targeted run.
+    if [ ${return_code} -eq 0 ] && [ ${conf_success+x} ] && [[ ! "${passthrough_options}" =~ "-i" ]] ; then
+      echo
+      cecho green "${conf_success}"
+    fi
 
-  # Output fail message, but only if it was set in config and this is not
-  # a non-targeted run.
-  if [ ${return_code} -eq 1 ] && [ ${conf_fail+x} ] && [[ ! "${passthrough_options}" =~ "-i" ]] ; then
-    echo
-    cecho red "${conf_fail}"
+    # Output fail message, but only if it was set in config and this is not
+    # a non-targeted run.
+    if [ ${return_code} -eq 1 ] && [ ${conf_fail+x} ] && [[ ! "${passthrough_options}" =~ "-i" ]] ; then
+      echo
+      cecho red "${conf_fail}"
+    fi
   fi
 
   return $return_code
@@ -246,6 +254,7 @@ function install() {
       # Remove leading comma.
       installed_paths=${installed_paths:1}
       phpcs --config-set installed_paths ${installed_paths}
+      phpcbf --config-set installed_paths ${installed_paths}
       echo "Set installed_path to ${installed_paths}."
     else
       echo "No valid standards' paths provided."

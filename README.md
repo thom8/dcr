@@ -34,7 +34,7 @@ DCR (Drupal Code Review) is a command-line utility to check that produced code f
 It is a shell script wrapper around PHP_CodeSniffer and JSLint with Drupal-related code sniffs.
 
 ### Why should I use it?
-Simply put - convenience. Run code review by only one command `dcr`. 
+Simply put - convenience. Run code review by only one command `dcr`.
 
 ### Why does it exist?
 1. **Ease of install:** `composer require alexdesignworks/dcr`
@@ -65,4 +65,4 @@ Yes. Use it in git pre-commit hook.
 Yes. In fact, there is a [dcr-demo](https://github.com/alexdesignworks/dcr-demo) and [dcr-global-demo](https://github.com/alexdesignworks/dcr-global-demo) projects were setup to test `dcr` integration.
 
 ## Does it automatically fix code?
-No. Not yet.
+Yes! If you specify `dcr fix` it will try to fix code in all files using.
