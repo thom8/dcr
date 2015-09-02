@@ -19,6 +19,12 @@
 #
 # Usage: dcr --help for usage.
 #
+#
+# .dcr.yml file can be stored in the root of your project (same level with
+# `vendor` dir) or in it's parent directory.
+#
+# dcr must be invoked from project root or one of it's sub-directories.
+#
 
 # Array of known standards paths within vendor directory.
 # Use 'dcr -i' to check which standards are available.
@@ -104,6 +110,14 @@ function main() {
     esac
   done
 
+  root_dir=$(get_root_dir)
+  # Add a gurad for running from root dir or one of its sub-dirs to make sure
+  # that all paths are properly resolved.
+  if [[ ! "$CURRENT_DIR" =~ "${root_dir}" ]] ; then
+    echo "dcr has to be run from project dir (${root_dir}) or one of it's sub-directories"
+    return 1
+  fi
+
   # Read config from the file. We allow file location in project root dir (the
   # dir wehere `vendor` dir resides) or one dir above.
   conf_file=$(get_conf_file)
@@ -130,16 +144,18 @@ function main() {
 
   # Re-write targets if custom ones where passed to this script.
   custom_targets=""
-  if [ "$passthrough_targets" == "" ] ; then
+  if [ "$passthrough_targets" != "" ] ; then
+    # Targets passed to this script.
+    custom_targets=$passthrough_targets
+  else
     # Check that targets were provided in cofig.
-    if [ ${conf_targets+x} ] ; then
+    if [ ${conf_targets+x} ] && [ "$conf_targets" != "" ] ; then
       custom_targets=$conf_targets
-    elif [ ! ${passthrough_options+x} ] && [ ! ${custom_options+x} ] ; then
+    elif [ "${passthrough_options}" == "" ] ; then
+      # No options were passed and no options were read from config.
       echo "No targets were provided"
       return 1
     fi
-  else
-    custom_targets=$passthrough_targets
   fi
 
   # Use custom parameters from config.
@@ -148,8 +164,11 @@ function main() {
   fi
 
   # Pass-through options always override any default and custom options.
+  root_dir=$(get_root_dir)
+  cd $root_dir
   phpcs $custom_options $passthrough_options $custom_targets
   return_code=$?
+  cd $CURRENT_DIR
 
   # Output success message, but only if it was set in config and this is not
   # a non-targeted run.
