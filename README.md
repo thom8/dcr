@@ -67,4 +67,4 @@ Yes. Use it in git pre-commit hook.
 Yes. In fact, there is a [dcr-demo](https://github.com/alexdesignworks/dcr-demo) and [dcr-global-demo](https://github.com/alexdesignworks/dcr-global-demo) projects were setup to test `dcr` integration.
 
 ## Does it automatically fix code?
-Yes! If you specify `dcr fix` it will try to fix code in all files using.
+Yes! If you run `dcr fix` it will try to fix code in all files using `phpcbf` with your current sniffs configuration.
