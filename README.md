@@ -10,9 +10,13 @@ Usually, code formatting in IDE covers about 80% of cases, and the other 20% are
 1. Pull all dependecies:<br/>`composer global require alexdesignworks/dcr`
 2. Link and copy required files (composer does not let to execute scripts):<br/>`~/.console/vendor/bin/dcr install && ~/.profile`
 
+Test of global build status: [![Circle CI](https://circleci.com/gh/alexdesignworks/dcr-global-demo.svg?style=svg)](https://circleci.com/gh/alexdesignworks/dcr-global-demo)
+
 ###Per-project (local):
 1. Pull all dependecies:<br/>`composer require alexdesignworks/dcr`
 2. Link and copy required files (composer does not let to execute scripts):<br/>`vendor/bin/dcr install && ~/.profile`
+
+Test of local build status: [![Circle CI](https://circleci.com/gh/alexdesignworks/dcr-demo.svg?style=svg)](https://circleci.com/gh/alexdesignworks/dcr-demo)
 
 ## Roadmap
 * <del>Show success and fail status messages</del> DONE
@@ -58,7 +62,7 @@ DCR contains the following:
 Yes. Use it in git pre-commit hook.
 
 ### Can it be used as a part of automated build?
-Yes. In fact, there is a `dcr-demo` project setup exaclty for this purpose. It's build status is [![Circle CI](https://circleci.com/gh/alexdesignworks/dcr-demo.svg?style=svg)](https://circleci.com/gh/alexdesignworks/dcr-demo)
+Yes. In fact, there is a [dcr-demo](https://github.com/alexdesignworks/dcr-demo) and [dcr-global-demo](https://github.com/alexdesignworks/dcr-global-demo) projects were setup to test `dcr` integration.
 
 ## Does it automatically fix code?
 No. Not yet.
