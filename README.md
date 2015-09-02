@@ -22,6 +22,8 @@ Test of local build status: [![Circle CI](https://circleci.com/gh/alexdesignwork
 * <del>Show success and fail status messages</del> DONE
 * <del>Allow DCR sniffs</del> DONE
 * <del>Allow custom sniffs</del> DONE
+* <del>Automated fix</del> DONE `dcr fix`
+* <del>Allow running only from project root dir or any subdirs</del> DONE
 * Use JSLint and Rhino
 * Limit files scan to N failed files
 * Scan only files changed in current branch comparing to a `main` branch.
