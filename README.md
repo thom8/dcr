@@ -1,26 +1,39 @@
 # Drupal Code Review (DCR) [![Circle CI](https://circleci.com/gh/alexdesignworks/dcr.svg?style=svg)](https://circleci.com/gh/alexdesignworks/dcr)
 
-The idea behind DCR is driven by the following workflow:<br/>
+### Bring all your code review dependencies with one command!
+
+The idea behind **DCR** is driven by the following workflow:<br/>
 Write code -> Format in IDE -> Code Review before Commit -> Commit
 
 Usually, code formatting in IDE covers about 80% of cases, and the other 20% are left to pre-commit code review, but they are the hardest to find.
 
 ## Installation
 ###Global:
-1. Pull all dependecies:<br/>`composer global require alexdesignworks/dcr`
-2. Link and copy required files (composer does not let to execute scripts):<br/>`~/.console/vendor/bin/dcr install && ~/.profile`
-
-Test of global build status: [![Circle CI](https://circleci.com/gh/alexdesignworks/dcr-global-demo.svg?style=svg)](https://circleci.com/gh/alexdesignworks/dcr-global-demo)
+1. Pull all dependecies:<br/>
+```
+composer global require alexdesignworks/dcr
+```
+2. Link and copy required files (composer does not let to execute scripts):
+```
+~/.console/vendor/bin/dcr install && ~/.profile
+```
+Global build status: [![Circle CI](https://circleci.com/gh/alexdesignworks/dcr-global-demo.svg?style=svg)](https://circleci.com/gh/alexdesignworks/dcr-global-demo)
 
 ###Per-project (local):
-1. Pull all dependecies:<br/>`composer require alexdesignworks/dcr`
-2. Link and copy required files (composer does not let to execute scripts):<br/>`vendor/bin/dcr install && ~/.profile`
+1. Pull all dependecies:<br/>
+```
+composer require alexdesignworks/dcr
+```
+2. Link and copy required files (composer does not let to execute scripts):
+```
+vendor/bin/dcr install && ~/.profile
+```
 
-Test of local build status: [![Circle CI](https://circleci.com/gh/alexdesignworks/dcr-demo.svg?style=svg)](https://circleci.com/gh/alexdesignworks/dcr-demo)
+Local build status: [![Circle CI](https://circleci.com/gh/alexdesignworks/dcr-demo.svg?style=svg)](https://circleci.com/gh/alexdesignworks/dcr-demo)
 
 ## Roadmap
 * <del>Show success and fail status messages</del> DONE
-* <del>Allow DCR sniffs</del> DONE
+* <del>Allow **DCR** sniffs</del> DONE
 * <del>Allow custom sniffs</del> DONE
 * <del>Automated fix</del> DONE `dcr fix`
 * <del>Allow running only from project root dir or any subdirs</del> DONE
@@ -30,10 +43,10 @@ Test of local build status: [![Circle CI](https://circleci.com/gh/alexdesignwork
 
 ## FAQ
 ### What is it?
-DCR (Drupal Code Review) is a command-line utility to check that produced code follows Drupal coding standards and best practices.
+**DCR** (Drupal Code Review) is a command-line utility to check that produced code follows Drupal coding standards and best practices.
 
 ### More specifically
-It is a shell script wrapper around PHP_CodeSniffer and JSLint with Drupal-related code sniffs.
+It is a shell script wrapper around PHP_CodeSniffer and JSLint with Drupal-related code sniffs. It uses native and custom 3rd party `phpcs` sniffs.
 
 ### Why should I use it?
 Simply put - convenience. Run code review by only one command `dcr`.
@@ -50,12 +63,12 @@ Code inspection in IDE distracts while writing code. Lets concentrate on writing
 ### Why is it a separate tool?
 There was a need in a dead-simple solution to review code using a single command, but also be flexible enough to handle project-based sniff rule customisations and pluggable into a CI pipeline.
 
-DCR installs as a single composer dev dependency either into your project or globally.
+**DCR** installs as a single composer dev dependency either into your project or globally.
 
-DCR contains the following:
+**DCR** contains the following:
 
 * PHP_CodeSniffer with Drupal, Drupal Practice sniffs.
-* Additional DCR sniff with more specific Drupal rules that.
+* Additional **DCR** sniff with more specific Drupal rules that.
 * Custom project-related sniff - very handy for any custom inclusions.
 * JavaScript code review using JSLint.
 * Colour CLI output - easy to spot issues.
