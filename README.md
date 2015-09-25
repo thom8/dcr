@@ -22,6 +22,8 @@ Test of local build status: [![Circle CI](https://circleci.com/gh/alexdesignwork
 * <del>Show success and fail status messages</del> DONE
 * <del>Allow DCR sniffs</del> DONE
 * <del>Allow custom sniffs</del> DONE
+* <del>Automated fix</del> DONE `dcr fix`
+* <del>Allow running only from project root dir or any subdirs</del> DONE
 * Use JSLint and Rhino
 * Limit files scan to N failed files
 * Scan only files changed in current branch comparing to a `main` branch.
@@ -65,4 +67,4 @@ Yes. Use it in git pre-commit hook.
 Yes. In fact, there is a [dcr-demo](https://github.com/alexdesignworks/dcr-demo) and [dcr-global-demo](https://github.com/alexdesignworks/dcr-global-demo) projects were setup to test `dcr` integration.
 
 ## Does it automatically fix code?
-Yes! If you specify `dcr fix` it will try to fix code in all files using.
+Yes! If you run `dcr fix` it will try to fix code in all files using `phpcbf` with your current sniffs configuration.
