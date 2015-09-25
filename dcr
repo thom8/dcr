@@ -70,6 +70,13 @@ function show_help() {
   echo "--brief         Show check progress only (no report). Usefull for CI."
   echo "*phpcs options  Any phpcs options ('phpcs --help' for options list)."
   echo "file or dir     Custom file or directory to check."
+  echo
+  echo "Fix:"
+  echo "dcr fix [*phpcbf options] [<file or dir>]"
+  echo
+  echo "fix             Fix all warnings and errors"
+  echo "*phpcbf options Any phpcbf options ('phpcbf --help' for options list)."
+  echo "file or dir     Custom file or directory to check."
 }
 
 #
