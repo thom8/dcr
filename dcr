@@ -62,10 +62,11 @@ function show_help() {
   echo "composer require alexdesignworks/dcr"
   echo "dcr install && . ~/.profile"
   echo
-  echo "Usage:"
+  echo "Lint:"
   echo "dcr [--explain] [--brief] [*phpcs options] [<file or dir>]"
   echo
-  echo "--explain       Show sniff codes oin all reports"
+  echo "explain,        Show sniff codes in all reports"
+  echo "--explain"
   echo "--brief         Show check progress only (no report). Usefull for CI."
   echo "*phpcs options  Any phpcs options ('phpcs --help' for options list)."
   echo "file or dir     Custom file or directory to check."
@@ -96,7 +97,7 @@ function main() {
       custom_options="${custom_options} --no-patch"
       shift # past argument with no value
       ;;
-      --explain)
+      --explain|explain)
       custom_options="${custom_options} -s"
       shift # past argument with no value
       ;;
