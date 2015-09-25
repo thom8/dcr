@@ -60,7 +60,8 @@ setup() {
   assert_success
 
   assert_contains "Drupal Code Review" "${lines[0]}"
-  assert_contains "Usage:" "$output"
+  assert_contains "Lint:" "$output"
+  assert_contains "Fix:" "$output"
 }
 
 @test "Parameter --explain works" {
