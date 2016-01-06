@@ -125,7 +125,7 @@ function main() {
   done
 
   root_dir=$(get_root_dir)
-  # Add a gurad for running from root dir or one of its sub-dirs to make sure
+  # Add a guard for running from root dir or one of its sub-dirs to make sure
   # that all paths are properly resolved.
   if [[ ! "$CURRENT_DIR" =~ "${root_dir}" ]] ; then
     echo "dcr has to be run from project dir (${root_dir}) or one of it's sub-directories"
