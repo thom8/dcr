@@ -288,6 +288,9 @@ function install() {
     echo "Copied example config file $DCR_DIR/$EXAMPLE_CONF to $conf_file."
   fi
 
+  # Install JSCS.
+  npm install jscs
+
   # Copy .jscsrc.drupal file.
   jscsrc_file=$CURRENT_DIR/$JSCSRC
   if [ -f $jscsrc_file ] ; then

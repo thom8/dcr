@@ -8,10 +8,5 @@
   },
   "bin": [
     "dcr"
-  ],
-  "scripts": {
-    "post-install-cmd": [
-      "npm install jscs"
-    ]
-  }
+  ]
 }
