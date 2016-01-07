@@ -3,9 +3,15 @@
   "minimum-stability": "dev",
   "require": {
     "php": ">=5.3.9",
-    "drupal/coder": "~8.2"
+    "drupal/coder": "~8.2",
+    "mouf/nodejs-installer": "~1.0"
   },
   "bin": [
     "dcr"
-  ]
+  ],
+  "scripts": {
+    "post-install-cmd": [
+      "npm install jscs"
+    ]
+  }
 }

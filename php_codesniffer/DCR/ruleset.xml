@@ -23,7 +23,7 @@
     Include custom DCR standards.
   -->
   <rule ref="DCR.WhiteSpace.FunctionClosingBraceSpace"/>
-  <rule ref="DCR.Debug.JSLint"/>
+  <rule ref="DCR.Debug.JSCS"/>
   <!--
     Replace line length check sniff with slightly customised sniff that
     respects commented code. These are the comments preceded by the line with

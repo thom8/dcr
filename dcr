@@ -43,6 +43,11 @@ CONF=".dcr.yml"
 # Configuation example file name.
 EXAMPLE_CONF="example.dcr.yml"
 
+# .jscsrc file name.
+JSCSRC=".jscsrc"
+# .jscsrc example file name.
+EXAMPLE_JSCSRC=".jscsrc.drupal"
+
 # Current directory where dcr was invoked at.
 CURRENT_DIR=$(pwd)
 # dcr file location directory.
@@ -241,7 +246,7 @@ function install() {
   if [[ "$phpcs" == "$bin_dir/phpcs" ]]; then
     installed_paths=""
 
-    # Traverse all known sniffs locations and check for their existance before
+    # Traverse all known sniffs locations and check for their existence before
     # setting.
     count=0
     while [ "x${STANDARDS_PATHS[count]}" != "x" ]
@@ -264,6 +269,8 @@ function install() {
       phpcs --config-set installed_paths ${installed_paths}
       phpcbf --config-set installed_paths ${installed_paths}
       echo "Set installed_path to ${installed_paths}."
+      # Set JSCS path.
+      phpcs --config-set jscs_path $(npm bin)
     else
       echo "No valid standards' paths provided."
     fi
@@ -279,6 +286,15 @@ function install() {
   else
     cp $DCR_DIR/$EXAMPLE_CONF $conf_file
     echo "Copied example config file $DCR_DIR/$EXAMPLE_CONF to $conf_file."
+  fi
+
+  # Copy .jscsrc.drupal file.
+  jscsrc_file=$CURRENT_DIR/$JSCSRC
+  if [ -f $jscsrc_file ] ; then
+    echo "Skipping copying of .jscsrc file - file $jscsrc_file exists."
+  else
+    cp $DCR_DIR/$EXAMPLE_JSCSRC $jscsrc_file
+    echo "Copied example .jscsrc file $DCR_DIR/$EXAMPLE_JSCSRC to $jscsrc_file."
   fi
 
   echo

@@ -1,3 +1,6 @@
+#
+# Exclude cache and temporary files.
+#
 Thumbs.db
 ._*
 .DS_Store
@@ -5,18 +8,13 @@ Thumbs.db
 *.sublime*
 .project
 .netbeans
-.idea
-codekit-config.json
-.sass-cache
 .bundle
 .bundle/*
 .htpasswd
 boxes/*
-/.vagrant/
-/local.Vagrantfile
 vendor
 composer.lock
-ultimatejslint.js
+node_modules
 
 # Exclude project-based configuration.
 .dcr.yml
