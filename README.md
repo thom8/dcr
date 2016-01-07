@@ -39,7 +39,7 @@ Global build status: [![Circle CI](https://circleci.com/gh/alexdesignworks/dcr-g
 * <del>Allow custom sniffs</del> DONE
 * <del>Automated fix</del> DONE `dcr fix`
 * <del>Allow running only from project root dir or any subdirs</del> DONE
-* Use JSLint and Rhino
+* <del>Add JS linting</del> DONE Using JSCS
 * Limit files scan to N failed files
 * Scan only files changed in current branch comparing to a `main` branch.
 
