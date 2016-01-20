@@ -55,7 +55,7 @@ Simply put - convenience. Run code review by only one command `dcr`.
 
 ### Why does it exist?
 1. **Ease of install:** `composer require alexdesignworks/dcr`
-2. **Less false-positives:** Drupal-specific excpetions allow to have clean DCR output.
+2. **Less false-positives:** Drupal-specific exceptions allow to have clean DCR output.
 3. **Simple call:** no need to call phpcs with tones of confusing parameters. Just use `dcr`.
 4. **Project-based configuration:** use `.dcr.yml` file to configure `dcr` for each project and make sure that your teammates are using exactly the same standards.
 
