@@ -37,6 +37,14 @@
     <exclude-pattern>*\.features\.*</exclude-pattern>
   </rule>
 
+  <!--Force short array syntax.-->
+  <rule ref="Generic.Arrays.DisallowLongArraySyntax.Found">
+    <type>warning</type>
+    <exclude-pattern>*\.features\.*</exclude-pattern>
+    <exclude-pattern>*\.strongarm\.*</exclude-pattern>
+    <exclude-pattern>*\.context\.*</exclude-pattern>
+    <exclude-pattern>*\.domains\.*</exclude-pattern>
+  </rule>
 
   <!--
     Exclude contrib modules.
