@@ -200,14 +200,6 @@
     <exclude-pattern>*\.views\.inc*</exclude-pattern>
   </rule>
 
-  <!--&lt;!&ndash;-->
-    <!--Disable SQL Injection checking in some files.-->
-  <!--&ndash;&gt;-->
-  <!--<rule ref="DrupalSecure.General.Helper.SQLi.dbQuery">-->
-    <!--&lt;!&ndash;.install files&ndash;&gt;-->
-    <!--<exclude-pattern>*\.install$</exclude-pattern>-->
-  <!--</rule>-->
-
   <!--
     Do not check that class name starts with capitals.
   -->
