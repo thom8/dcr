@@ -37,10 +37,6 @@
     <exclude-pattern>*\.features\.*</exclude-pattern>
   </rule>
 
-  <!--
-    Exclude puppet files.
-  -->
-  <exclude-pattern>puppet/*</exclude-pattern>
 
   <!--
     Exclude contrib modules.
