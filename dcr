@@ -5,13 +5,13 @@
 # A lightweight wrapper around phpcs.
 #
 # Installation (global):
-# 1. Pull all dependecies:
+# 1. Pull all dependencies:
 # composer global require alexdesignworks/dcr
 # 2. Link and copy required files (composer does not let to execute scripts):
 # ~/.console/vendor/bin/dcr install && ~/.profile
 #
 # Installation (local):
-# 1. Pull all dependecies:
+# 1. Pull all dependencies:
 # composer require alexdesignworks/dcr
 # 2. Link and copy required files (composer does not let to execute scripts):
 # vendor/bin/dcr install && ~/.profile
@@ -38,9 +38,9 @@ STANDARDS_PATHS=(
   %current%/dcr_standards
 )
 
-# Configuation file name.
+# Configuration file name.
 CONF=".dcr.yml"
-# Configuation example file name.
+# Configuration example file name.
 EXAMPLE_CONF="example.dcr.yml"
 
 # .jscsrc file name.
@@ -72,7 +72,7 @@ function show_help() {
   echo
   echo "explain,        Show sniff codes in all reports"
   echo "--explain"
-  echo "--brief         Show check progress only (no report). Usefull for CI."
+  echo "--brief         Show check progress only (no report). Useful for CI."
   echo "*phpcs options  Any phpcs options ('phpcs --help' for options list)."
   echo "file or dir     Custom file or directory to check."
   echo
@@ -107,15 +107,15 @@ function main() {
       fix)
       binary="phpcbf"
       custom_options="${custom_options} --no-patch"
-      shift # past argument with no value
+      shift
       ;;
       --explain|explain)
       custom_options="${custom_options} -s"
-      shift # past argument with no value
+      shift
       ;;
       --brief)
       custom_options="${custom_options} -p --report-file=/dev/null"
-      shift # past argument with no value
+      shift
       ;;
       *)
       # Passthrough all unknown options.
@@ -138,7 +138,7 @@ function main() {
   fi
 
   # Read config from the file. We allow file location in project root dir (the
-  # dir wehere `vendor` dir resides) or one dir above.
+  # dir where `vendor` dir resides) or one dir above.
   conf_file=$(get_conf_file)
 
   # Error if config does not exist.
@@ -167,7 +167,7 @@ function main() {
     # Targets passed to this script.
     custom_targets=$passthrough_targets
   else
-    # Check that targets were provided in cofig.
+    # Check that targets were provided in config.
     if [ ${conf_targets+x} ] && [ "$conf_targets" != "" ] ; then
       custom_targets=$conf_targets
     elif [ "${passthrough_options}" == "" ] ; then
@@ -218,7 +218,7 @@ function install() {
   # Get bin directory location from composer config.
   bin_dir=${root_dir}/$(composer config bin-dir)
 
-  # Additnially, symlink dcr into vendor bin.
+  # Additionally, symlink dcr into vendor bin.
   if [ ! -L "${bin_dir}/dcr" ] ; then
     ln -s $DCR_DIR/dcr ${bin_dir}/dcr
     echo "Symlinked dcr into ${bin_dir}"
@@ -240,7 +240,7 @@ function install() {
     echo "dcr_standards directory already exists at ${CURRENT_DIR}"
   fi
 
-  # Add code sniffer install path to phpcs config to allow proper stadnards
+  # Add code sniffer install path to phpcs config to allow proper standards
   # path resolution. This also handles paths for global and local installation.
   phpcs=$(which phpcs)
   if [[ "$phpcs" == "$bin_dir/phpcs" ]]; then
@@ -331,7 +331,7 @@ get_conf_file() {
     $(dirname $CURRENT_DIR)/$CONF
     # Root dir.
     $root_dir/$CONF
-    # Dir aove root.
+    # Dir above root.
     $(dirname $root_dir)/$CONF
   )
   # Traverse all known config locations.
