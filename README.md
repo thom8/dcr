@@ -8,7 +8,6 @@ Write code -> Format in IDE -> Code Review before Commit -> Commit
 Usually, code formatting in IDE covers about 80% of cases, and the other 20% are left to pre-commit code review, but they are the hardest to find.
 
 ## Installation
-###Per-project (local):
 1. Pull all dependecies:<br/>
   ```
   composer require alexdesignworks/dcr
@@ -34,19 +33,6 @@ Or use `composer.json`:
   }
 }
 ```
-
-###Global:
-1. Pull all dependecies:<br/>
-  ```
-  composer global require alexdesignworks/dcr
-  ```
-2. Link and copy required files (composer does not let to execute scripts):<br/>
-  ```
-  ~/.console/vendor/bin/dcr install && ~/.profile
-  ```
-
-Global build status: [![Circle CI](https://circleci.com/gh/alexdesignworks/dcr-global-demo.svg?style=svg)](https://circleci.com/gh/alexdesignworks/dcr-global-demo)
-
 
 ## Roadmap
 * <del>Show success and fail status messages</del> DONE
