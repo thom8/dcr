@@ -7,7 +7,7 @@
 # Space (!) separated list of files or directories to scan.
 targets: "sites/all/modules/custom sites/all/themes/custom"
 # Comma-separated list of extensions to scan.
-extensions: "module,install,profile,php,theme,inc,js"
+extensions: "module,install,profile,php,theme,inc,test,js"
 # Comma-separated list of required standards to use.
 standards: "DCR"
 # Space-separated list of phpcs parameters to run dcr.
