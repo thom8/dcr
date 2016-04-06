@@ -20,6 +20,21 @@ Usually, code formatting in IDE covers about 80% of cases, and the other 20% are
 
 Local build status: [![Circle CI](https://circleci.com/gh/alexdesignworks/dcr-demo.svg?style=svg)](https://circleci.com/gh/alexdesignworks/dcr-demo)
 
+Or use `composer.json`:
+```json
+{
+  "minimum-stability": "dev",
+  "require-dev": {
+    "alexdesignworks/dcr": "0.0.*"
+  },
+  "scripts": {
+    "post-update-cmd": [
+      "bash vendor/bin/dcr install"
+    ]
+  }
+}
+```
+
 ###Global:
 1. Pull all dependecies:<br/>
   ```
