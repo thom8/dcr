@@ -14,8 +14,7 @@
 # 1. Pull all dependencies:
 # composer require alexdesignworks/dcr
 # 2. Link and copy required files (composer does not let to execute scripts):
-# vendor/bin/dcr install && ~/.profile
-#
+# source vendor/bin/dcr install
 #
 # Usage: dcr --help for usage.
 #
@@ -224,12 +223,25 @@ function install() {
     echo "Symlinked dcr into ${bin_dir}"
   fi
 
-  if /bin/cat ~/.profile | /bin/grep -ohq "PATH=$bin_dir:\$PATH\$"; then
-    echo "DCR bin directory $bin_dir is already in PATH";
+  # Add "vendor/bin" into PATH, if it is not there.
+  if /bin/echo $PATH | /bin/grep -ohq "$bin_dir"; then
+    echo "DCR bin directory $bin_dir is already in PATH"
   else
-    echo "PATH=$bin_dir:\$PATH" >> $HOME/.profile;
-    . $HOME/.profile
-    echo "Added DCR bin directory $bin_dir to PATH";
+    path_file=$HOME/.profile
+    if /bin/cat $path_file | /bin/grep -ohq "PATH=$bin_dir:\$PATH\$"; then
+      echo "DCR bin directory $bin_dir is already in PATH";
+    else
+      echo "PATH=$bin_dir:\$PATH" >> $path_file;
+    fi
+
+    export PATH=$bin_dir:$PATH
+
+    if /bin/echo $PATH | /bin/grep -ohq "$bin_dir"; then
+      echo "Added DCR bin directory $bin_dir to current session PATH";
+    else
+      echo "ERROR: Unable to add DCR bin directory $bin_dir to PATH";
+      return 1
+    fi
   fi
 
   # Add App standard directory to current dir to allow ruleset customisations.
@@ -299,9 +311,6 @@ function install() {
     cp $DCR_DIR/$EXAMPLE_JSCSRC $jscsrc_file
     echo "Copied example .jscsrc file $DCR_DIR/$EXAMPLE_JSCSRC to $jscsrc_file."
   fi
-
-  echo
-  echo "Please run . ~/.profile to make dcr available in current session"
 }
 
 #
