@@ -25,26 +25,26 @@
 # %vendor% - vendor directory.
 # %dcr% - dcr file location directory.
 # %current% - the directory where the script was invoked in.
-STANDARDS_PATHS=(
+DCR_STANDARDS_PATHS=(
   %vendor%/drupal/coder/coder_sniffer
   %dcr%/php_codesniffer
   %current%/dcr_standards
 )
 
 # Configuration file name.
-CONF=".dcr.yml"
+DCR_CONF=".dcr.yml"
 # Configuration example file name.
-EXAMPLE_CONF="example.dcr.yml"
+DCR_CONF_EXAMPLE="example.dcr.yml"
 
 # .jscsrc file name.
-JSCSRC=".jscsrc"
+DCR_JSCSRC_CONF=".jscsrc"
 # .jscsrc example file name.
-EXAMPLE_JSCSRC=".jscsrc.drupal"
+DCR_JSCSRC_CONF_EXAMPLE=".jscsrc.drupal"
 
 # Current directory where dcr was invoked at.
-CURRENT_DIR=$(pwd)
+DCR_CURRENT_DIR=$(pwd)
 # dcr file location directory.
-DCR_DIR="$(dirname -- "$(readlink -f -- "$0")")"
+DCR_BIN_DIR="$(dirname -- "$(readlink -f -- "$0")")"
 
 #
 # Help message output.
@@ -125,7 +125,7 @@ function main() {
   root_dir=$(get_root_dir)
   # Add a guard for running from root dir or one of its sub-dirs to make sure
   # that all paths are properly resolved.
-  if [[ ! "$CURRENT_DIR" =~ "${root_dir}" ]] ; then
+  if [[ ! "$DCR_CURRENT_DIR" =~ "${root_dir}" ]] ; then
     echo "dcr has to be run from project dir (${root_dir}) or one of it's sub-directories"
     return 1
   fi
@@ -136,7 +136,7 @@ function main() {
 
   # Error if config does not exist.
   if [ "$conf_file" == "" ] ; then
-    echo "Unable to open DCR config file. Please copy $DCR_DIR/$EXAMPLE_CONF to project root."
+    echo "Unable to open DCR config file. Please copy $DCR_BIN_DIR/$DCR_CONF_EXAMPLE to project root."
     return 1
   fi
 
@@ -180,7 +180,7 @@ function main() {
   cd $root_dir
   $binary $custom_options $passthrough_options $custom_targets
   return_code=$?
-  cd $CURRENT_DIR
+  cd $DCR_CURRENT_DIR
 
   if [ "$binary" == "phpcs" ] ; then
     # Output success message, but only if it was set in config and this is not
@@ -213,7 +213,7 @@ function install() {
 
   # Additionally, symlink dcr into vendor bin.
   if [ ! -L "${bin_dir}/dcr" ] ; then
-    ln -s $DCR_DIR/dcr ${bin_dir}/dcr
+    ln -s $DCR_BIN_DIR/dcr ${bin_dir}/dcr
     echo "Symlinked dcr into ${bin_dir}"
   fi
 
@@ -239,11 +239,11 @@ function install() {
   fi
 
   # Add App standard directory to current dir to allow ruleset customisations.
-  if [ ! -d "${CURRENT_DIR}/dcr_standards" ] ; then
-    cp -r ${DCR_DIR}/dcr_standards ${CURRENT_DIR}
-    echo "Copied dcr_standards directory to ${CURRENT_DIR}"
+  if [ ! -d "${DCR_CURRENT_DIR}/dcr_standards" ] ; then
+    cp -r ${DCR_BIN_DIR}/dcr_standards ${DCR_CURRENT_DIR}
+    echo "Copied dcr_standards directory to ${DCR_CURRENT_DIR}"
   else
-    echo "dcr_standards directory already exists at ${CURRENT_DIR}"
+    echo "dcr_standards directory already exists at ${DCR_CURRENT_DIR}"
   fi
 
   # Add code sniffer install path to phpcs config to allow proper standards
@@ -255,13 +255,13 @@ function install() {
     # Traverse all known sniffs locations and check for their existence before
     # setting.
     count=0
-    while [ "x${STANDARDS_PATHS[count]}" != "x" ]
+    while [ "x${DCR_STANDARDS_PATHS[count]}" != "x" ]
     do
        # Replace path tokens.
-       standard_path=${STANDARDS_PATHS[count]}
+       standard_path=${DCR_STANDARDS_PATHS[count]}
        standard_path=$(echo ${standard_path} | sed -e "s?%vendor%?${vendor_dir}?g")
-       standard_path=$(echo ${standard_path} | sed -e "s?%dcr%?${DCR_DIR}?g")
-       standard_path=$(echo ${standard_path} | sed -e "s?%current%?${CURRENT_DIR}?g")
+       standard_path=$(echo ${standard_path} | sed -e "s?%dcr%?${DCR_BIN_DIR}?g")
+       standard_path=$(echo ${standard_path} | sed -e "s?%current%?${DCR_CURRENT_DIR}?g")
 
        if [ -d $standard_path ] ; then
         installed_paths=${installed_paths},${standard_path}
@@ -286,12 +286,12 @@ function install() {
   fi
 
   # Copy config file.
-  conf_file=$CURRENT_DIR/$CONF
+  conf_file=$DCR_CURRENT_DIR/$DCR_CONF
   if [ -f $conf_file ] ; then
     echo "Skipping copying of config file - file $conf_file exists."
   else
-    cp $DCR_DIR/$EXAMPLE_CONF $conf_file
-    echo "Copied example config file $DCR_DIR/$EXAMPLE_CONF to $conf_file."
+    cp $DCR_BIN_DIR/$DCR_CONF_EXAMPLE $conf_file
+    echo "Copied example config file $DCR_BIN_DIR/$DCR_CONF_EXAMPLE to $conf_file."
   fi
 
   # Install JSCS.
@@ -306,12 +306,12 @@ function install() {
   fi
 
   # Copy .jscsrc.drupal file.
-  jscsrc_file=$CURRENT_DIR/$JSCSRC
+  jscsrc_file=$DCR_CURRENT_DIR/$DCR_JSCSRC_CONF
   if [ -f $jscsrc_file ] ; then
     echo "Skipping copying of .jscsrc file - file $jscsrc_file exists."
   else
-    cp $DCR_DIR/$EXAMPLE_JSCSRC $jscsrc_file
-    echo "Copied example .jscsrc file $DCR_DIR/$EXAMPLE_JSCSRC to $jscsrc_file."
+    cp $DCR_BIN_DIR/$DCR_JSCSRC_CONF_EXAMPLE $jscsrc_file
+    echo "Copied example .jscsrc file $DCR_BIN_DIR/$DCR_JSCSRC_CONF_EXAMPLE to $jscsrc_file."
   fi
 }
 
@@ -321,10 +321,10 @@ function install() {
 get_root_dir() {
   # Check if DCR ran as dependency (installed into vendor dir) or as an app
   # by itself (for dcr development).
-  if [[ "$DCR_DIR" =~ "vendor" ]]; then
-    root_dir="$(dirname $(dirname $(dirname $DCR_DIR)))"
+  if [[ "$DCR_BIN_DIR" =~ "vendor" ]]; then
+    root_dir="$(dirname $(dirname $(dirname $DCR_BIN_DIR)))"
   else
-    root_dir="$DCR_DIR"
+    root_dir="$DCR_BIN_DIR"
   fi
 
   echo $root_dir
@@ -337,13 +337,13 @@ get_conf_file() {
   root_dir=$(get_root_dir)
   conf_files=(
     # Current dir.
-    $CURRENT_DIR/$CONF
+    $DCR_CURRENT_DIR/$CONF
     # Dir above current.
-    $(dirname $CURRENT_DIR)/$CONF
+    $(dirname $DCR_CURRENT_DIR)/$DCR_CONF
     # Root dir.
-    $root_dir/$CONF
+    $root_dir/$DCR_CONF
     # Dir above root.
-    $(dirname $root_dir)/$CONF
+    $(dirname $root_dir)/$DCR_CONF
   )
   # Traverse all known config locations.
   matched_conf_file=""
