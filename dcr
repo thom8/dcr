@@ -222,6 +222,9 @@ install() {
   # check is to make sure that config file exist and create it if it does not.
   create_config_file
 
+  # Make sure that DCR is symlink into composer bin.
+  symlink_file $(get_dcr) $(get_composer_bin_dir)/dcr
+
   # To allow access to DCR binary from anywhere in the system, composer's binary
   # directory needs to be added to the $PATH environment variable.
   add_environment_path $(get_composer_bin_dir) $DCR_PATH_FILE
@@ -275,6 +278,20 @@ create_config_file() {
     secho changed "Copied example config file $dcr_dir/$DCR_CONF_EXAMPLE to $new_conf_file."
   fi
 }
+
+#
+# Symlink file into location, if it does not exist.
+#
+symlink_file() {
+  local src=$1
+  local dst=$2
+
+  if [ ! -L "$dst" ] ; then
+    ln -s src dst
+    echo "Symlinked $src into $dst"
+  fi
+}
+
 
 #
 # Add environment path.
