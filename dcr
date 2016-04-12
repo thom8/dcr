@@ -14,7 +14,7 @@
 #
 #
 # .dcr.yml file can be stored in the root of your project (same level with
-# `vendor` dir) or in it's parent directory.
+# 'vendor' dir) or in it's parent directory.
 #
 # dcr must be invoked from project root or one of it's sub-directories.
 #
@@ -131,7 +131,7 @@ function main() {
   fi
 
   # Read config from the file. We allow file location in project root dir (the
-  # dir where `vendor` dir resides) or one dir above.
+  # dir where 'vendor' dir resides) or one dir above.
   conf_file=$(get_conf_file)
 
   # Error if config does not exist.
@@ -316,7 +316,7 @@ function install() {
 }
 
 #
-# Get root dir (the dir where `vendor` dir resides).
+# Get root dir (the dir where 'vendor' dir resides).
 #
 get_root_dir() {
   # Check if DCR ran as dependency (installed into vendor dir) or as an app
