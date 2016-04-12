@@ -1,5 +1,5 @@
-#!/bin/bash
-#
+#!/usr/bin/env bash
+
 # Drupal Code Review
 #
 # A lightweight wrapper around phpcs.
@@ -12,53 +12,56 @@
 #
 # Usage: dcr --help for usage.
 #
-#
 # .dcr.yml file can be stored in the root of your project (same level with
 # 'vendor' dir) or in it's parent directory.
 #
 # dcr must be invoked from project root or one of it's sub-directories.
 #
+#echo ${BASH_SOURCE[0]}
+#source realpath-lib
+
+# Configuration file name.
+readonly DCR_CONF=".dcr.yml"
+# Configuration example file name.
+readonly DCR_CONF_EXAMPLE="example.dcr.yml"
+
+# .jscsrc file name.
+readonly DCR_JSCSRC_CONF=".jscsrc"
+# .jscsrc example file name.
+readonly DCR_JSCSRC_CONF_EXAMPLE=".jscsrc.drupal"
+
+# Directory with App standards.
+readonly DCR_APP_STANDARDS_DIR=dcr_standards
 
 # Array of known standards paths within vendor directory.
 # Use 'dcr -i' to check which standards are available.
 # Available tokens:
-# %vendor% - vendor directory.
+# %vendor% - composer vendor directory.
 # %dcr% - dcr file location directory.
 # %current% - the directory where the script was invoked in.
-DCR_STANDARDS_PATHS=(
+# %project% - project root directory (where the DCR_CONF file is).
+readonly DCR_STANDARDS_PATHS=(
   %vendor%/drupal/coder/coder_sniffer
   %dcr%/php_codesniffer
-  %current%/dcr_standards
+  %project%/$DCR_APP_STANDARDS_DIR
 )
 
-# Configuration file name.
-DCR_CONF=".dcr.yml"
-# Configuration example file name.
-DCR_CONF_EXAMPLE="example.dcr.yml"
-
-# .jscsrc file name.
-DCR_JSCSRC_CONF=".jscsrc"
-# .jscsrc example file name.
-DCR_JSCSRC_CONF_EXAMPLE=".jscsrc.drupal"
-
-# Current directory where dcr was invoked at.
-DCR_CURRENT_DIR=$(pwd)
-# dcr file location directory.
-DCR_BIN_DIR="$(dirname -- "$(readlink -f -- "$0")")"
+# The file to write DCR path into.
+readonly DCR_PATH_FILE=$HOME/.profile
 
 #
 # Help message output.
 #
-function show_help() {
+show_help() {
   echo "Drupal Code Review"
   echo
   echo "Installation (global):"
   echo "composer global require alexdesignworks/dcr"
-  echo "dcr install && . ~/.profile"
+  echo "\$(composer config -g bin-dir)/dcr install"
   echo
   echo "Installation (local):"
   echo "composer require alexdesignworks/dcr"
-  echo "dcr install && . ~/.profile"
+  echo "\$(composer config bin-dir)/dcr install"
   echo
   echo "Lint:"
   echo "dcr [--explain] [--brief] [*phpcs options] [<file or dir>]"
@@ -80,11 +83,14 @@ function show_help() {
 #
 # Main entry point.
 #
-function main() {
-  custom_options=""
-  passthrough_options=""
-  passthrough_targets=""
-  binary="phpcs"
+main() {
+  local command_phpcs=$(which phpcs)
+  local command_phpcbf=$(which phpcbf)
+  local binary=$command_phpcs
+  local custom_options=""
+  local custom_targets=""
+  local passthrough_options=""
+  local passthrough_targets=""
 
   for i in "$@"
   do
@@ -98,7 +104,7 @@ function main() {
       return
       ;;
       fix)
-      binary="phpcbf"
+      binary=$command_phpcbf
       custom_options="${custom_options} --no-patch"
       shift
       ;;
@@ -122,21 +128,26 @@ function main() {
     esac
   done
 
-  root_dir=$(get_root_dir)
-  # Add a guard for running from root dir or one of its sub-dirs to make sure
+upfind "$DCR_CONF"
+return 0
+
+  local project_dir=$(get_conf_dir)
+  local dcr_bin_dir=$(get_dcr_dir)
+  local current_dir=$(get_current_dir)
+
+  # Add a guard for running from project dir or one of its sub-dirs to make sure
   # that all paths are properly resolved.
-  if [[ ! "$DCR_CURRENT_DIR" =~ "${root_dir}" ]] ; then
-    echo "dcr has to be run from project dir (${root_dir}) or one of it's sub-directories"
+  if [[ ! "$current_dir" =~ "$project_dir" ]] ; then
+    secho error "dcr has to be run from project dir (${project_dir}) or one of it's sub-directories"
     return 1
   fi
 
-  # Read config from the file. We allow file location in project root dir (the
-  # dir where 'vendor' dir resides) or one dir above.
-  conf_file=$(get_conf_file)
+  # Read config from the file.
+  local conf_file=$(get_conf_file)
 
   # Error if config does not exist.
   if [ "$conf_file" == "" ] ; then
-    echo "Unable to open DCR config file. Please copy $DCR_BIN_DIR/$DCR_CONF_EXAMPLE to project root."
+    secho error "Unable to open DCR config file. Please copy $dcr_bin_dir/$DCR_CONF_EXAMPLE to the project root."
     return 1
   fi
 
@@ -155,7 +166,6 @@ function main() {
   fi
 
   # Re-write targets if custom ones where passed to this script.
-  custom_targets=""
   if [ "$passthrough_targets" != "" ] ; then
     # Targets passed to this script.
     custom_targets=$passthrough_targets
@@ -165,7 +175,7 @@ function main() {
       custom_targets=$conf_targets
     elif [ "${passthrough_options}" == "" ] ; then
       # No options were passed and no options were read from config.
-      echo "No targets were provided"
+      secho error "No targets were provided"
       return 1
     fi
   fi
@@ -176,13 +186,13 @@ function main() {
   fi
 
   # Pass-through options always override any default and custom options.
-  root_dir=$(get_root_dir)
-  cd $root_dir
+  cd $project_dir
   $binary $custom_options $passthrough_options $custom_targets
-  return_code=$?
+  local return_code=$?
   cd $DCR_CURRENT_DIR
 
-  if [ "$binary" == "phpcs" ] ; then
+  # Output message for phpcs.
+  if [ "$binary" == "$command_phpcs" ] ; then
     # Output success message, but only if it was set in config and this is not
     # a non-targeted run.
     if [ ${return_code} -eq 0 ] && [ ${conf_success+x} ] && [[ ! "${passthrough_options}" =~ "-i" ]] ; then
@@ -204,150 +214,297 @@ function main() {
 #
 # Additional installation steps.
 #
-function install() {
-  root_dir=$(get_root_dir)
-  vendor_dir=${root_dir}/vendor
+install() {
+  local command_grep=$(which grep)
+  local command_cat=$(which cat)
 
-  # Get bin directory location from composer config.
-  bin_dir=${root_dir}/$(composer config bin-dir)
+  # Print installation information.
+  install_info
 
-  # Additionally, symlink dcr into vendor bin.
-  if [ ! -L "${bin_dir}/dcr" ] ; then
-    ln -s $DCR_BIN_DIR/dcr ${bin_dir}/dcr
-    echo "Symlinked dcr into ${bin_dir}"
-  fi
+  # Config file is used to find current working directory, so the very first
+  # check is to make sure that config file exist and create it if it does not.
+  create_config_file
 
-  # Add "vendor/bin" into PATH, if it is not there.
-  if /bin/echo $PATH | /bin/grep -ohq "$bin_dir"; then
-    echo "DCR bin directory $bin_dir is already in PATH"
-  else
-    path_file=$HOME/.profile
-    if /bin/cat $path_file | /bin/grep -ohq "PATH=$bin_dir:\$PATH\$"; then
-      echo "DCR bin directory $bin_dir is already in PATH";
-    else
-      echo "PATH=$bin_dir:\$PATH" >> $path_file;
-    fi
+  # To allow access to DCR binary from anywhere in the system, composer's binary
+  # directory needs to be added to the $PATH environment variable.
+  add_environment_path $(get_composer_bin_dir) $DCR_PATH_FILE
 
-    export PATH=$bin_dir:$PATH
-
-    if /bin/echo $PATH | /bin/grep -ohq "$bin_dir"; then
-      echo "Added DCR bin directory $bin_dir to current session PATH";
-    else
-      echo "ERROR: Unable to add DCR bin directory $bin_dir to PATH";
-      return 1
-    fi
-  fi
-
-  # Add App standard directory to current dir to allow ruleset customisations.
-  if [ ! -d "${DCR_CURRENT_DIR}/dcr_standards" ] ; then
-    cp -r ${DCR_BIN_DIR}/dcr_standards ${DCR_CURRENT_DIR}
-    echo "Copied dcr_standards directory to ${DCR_CURRENT_DIR}"
-  else
-    echo "dcr_standards directory already exists at ${DCR_CURRENT_DIR}"
-  fi
-
-  # Add code sniffer install path to phpcs config to allow proper standards
+  # Register code sniffer install path to phpcs config to allow proper standards
   # path resolution. This also handles paths for global and local installation.
-  phpcs=$(which phpcs)
-  if [[ "$phpcs" == "$bin_dir/phpcs" ]]; then
-    installed_paths=""
+  register_codesniffer_standards
 
-    # Traverse all known sniffs locations and check for their existence before
-    # setting.
-    count=0
-    while [ "x${DCR_STANDARDS_PATHS[count]}" != "x" ]
-    do
-       # Replace path tokens.
-       standard_path=${DCR_STANDARDS_PATHS[count]}
-       standard_path=$(echo ${standard_path} | sed -e "s?%vendor%?${vendor_dir}?g")
-       standard_path=$(echo ${standard_path} | sed -e "s?%dcr%?${DCR_BIN_DIR}?g")
-       standard_path=$(echo ${standard_path} | sed -e "s?%current%?${DCR_CURRENT_DIR}?g")
+  # Separately add JS code sniffer.
+  install_jscs
 
-       if [ -d $standard_path ] ; then
-        installed_paths=${installed_paths},${standard_path}
-       fi
-       count=$(( $count + 1 ))
-    done
+  register_jscs_standards
 
-    if [ "${installed_paths}" != "" ] ; then
-      # Remove leading comma.
-      installed_paths=${installed_paths:1}
-      phpcs --config-set installed_paths ${installed_paths}
-      phpcbf --config-set installed_paths ${installed_paths}
-      echo "Set installed_path to ${installed_paths}."
-      # Set JSCS path.
-      phpcs --config-set jscs_path $(npm bin)
-    else
-      echo "No valid standards' paths provided."
-    fi
+  validate_install
+
+  return 0
+}
+
+#
+# Installation information for all variables used.
+#
+install_info() {
+  echo "--------------------------------------------------------------------------------"
+  echo " DCR installation information"
+  echo "--------------------------------------------------------------------------------"
+  echo " DCR location:          " $(get_dcr)
+  echo " DCR dir location:      " $(get_dcr_dir)
+  echo " DCR installation type: " $(get_install_type)
+  echo " Config file:           " $(get_conf_file)
+  echo " Config file dir:       " $(get_conf_dir)
+  echo " Composer home:         " $(get_composer_home_dir)
+  echo " Composer vendor:       " $(get_composer_vendor_dir)
+  echo " Composer bin:          " $(get_composer_bin_dir)
+  echo " Current directory:     " $(get_current_dir)
+  echo "--------------------------------------------------------------------------------"
+  echo
+}
+
+#
+# Validate that config file exists and create one if it does not.
+#
+create_config_file() {
+  local conf_file=$(get_conf_file)
+  local dcr_dir=$(get_dcr_dir)
+
+  if [ -n "$conf_file" ] && [ -f $conf_file ] ; then
+    secho status "Skipping copying of config file - file $conf_file exists."
   else
-    echo "Incorrect phpcs is in use. Make sure that phpcs is available in this session."
-    return 1
-  fi
-
-  # Copy config file.
-  conf_file=$DCR_CURRENT_DIR/$DCR_CONF
-  if [ -f $conf_file ] ; then
-    echo "Skipping copying of config file - file $conf_file exists."
-  else
-    cp $DCR_BIN_DIR/$DCR_CONF_EXAMPLE $conf_file
-    echo "Copied example config file $DCR_BIN_DIR/$DCR_CONF_EXAMPLE to $conf_file."
-  fi
-
-  # Install JSCS.
-  npm list jscs >> /dev/null
-  jscs_installed=$?
-
-  if [ $jscs_installed -eq 0 ] ; then
-    echo "JSCS is already installed"
-  else
-    echo "Installing JSCS"
-    npm install jscs
-  fi
-
-  # Copy .jscsrc.drupal file.
-  jscsrc_file=$DCR_CURRENT_DIR/$DCR_JSCSRC_CONF
-  if [ -f $jscsrc_file ] ; then
-    echo "Skipping copying of .jscsrc file - file $jscsrc_file exists."
-  else
-    cp $DCR_BIN_DIR/$DCR_JSCSRC_CONF_EXAMPLE $jscsrc_file
-    echo "Copied example .jscsrc file $DCR_BIN_DIR/$DCR_JSCSRC_CONF_EXAMPLE to $jscsrc_file."
+    local new_conf_file=$(get_current_dir)/$DCR_CONF
+    cp $dcr_dir/$DCR_CONF_EXAMPLE $new_conf_file
+    secho changed "Copied example config file $dcr_dir/$DCR_CONF_EXAMPLE to $new_conf_file."
   fi
 }
 
 #
-# Get root dir (the dir where 'vendor' dir resides).
+# Add environment path.
 #
-get_root_dir() {
-  # Check if DCR ran as dependency (installed into vendor dir) or as an app
-  # by itself (for dcr development).
-  if [[ "$DCR_BIN_DIR" =~ "vendor" ]]; then
-    root_dir="$(dirname $(dirname $(dirname $DCR_BIN_DIR)))"
+add_environment_path() {
+  local text=$1
+  local path_file=$2
+
+  local command_grep=$(which grep)
+  local command_cat=$(which cat)
+  if echo $PATH | $command_grep -ohq "$text"; then
+    secho status "Directory $text is already in PATH"
   else
-    root_dir="$DCR_BIN_DIR"
+    if $command_cat $path_file | $command_grep -ohq "PATH=$text:\$PATH\$"; then
+      secho status "Directory $text already exported into file $path_file"
+    else
+      echo "PATH=$text:\$PATH" >> $path_file;
+    fi
+
+    export PATH=$text:$PATH
+    if echo $PATH | $command_grep -ohq "$text"; then
+      secho changed "Added directory $text to current session PATH"
+    else
+      secho error "Unable to add directory $text to PATH"
+      return 1
+    fi
+  fi
+}
+
+#
+# Create APP standards directory.
+#
+create_app_standards() {
+  local conf_dir=$(get_conf_dir)
+
+  if [ -z "$conf_dir" ] ; then
+    secho error "Unable to copy $DCR_APP_STANDARDS_DIR directory"
+    return 1
   fi
 
-  echo $root_dir
+  # Add App standard directory to current dir to allow ruleset customisations.
+  if [ ! -d "$conf_dir/$DCR_APP_STANDARDS_DIR" ] ; then
+    cp -r $(get_dcr_dir)/$DCR_APP_STANDARDS_DIR $conf_dir
+    secho changed "Copied $DCR_APP_STANDARDS_DIR directory to $conf_dir"
+  else
+    secho status "$DCR_APP_STANDARDS_DIR directory already exists at $conf_dir"
+  fi
+}
+
+#
+# Register all codesniffer standards.
+#
+register_codesniffer_standards() {
+  local paths=("${DCR_STANDARDS_PATHS[@]}")
+  local command_phpcs=$(which phpcs)
+  local command_phpcbf=$(which phpcbf)
+  local composer_bin=$(get_composer_bin_dir)
+
+  # Check that phpcs is available. By the time this function is called all
+  # composer binaries should already be exposed to PATH.
+  if [ "$command_phpcs" != "$composer_bin/phpcs" ] || [ "$command_phpcbf" != "$composer_bin/phpcbf" ] ; then
+    secho error "Incorrect phpcs or phpcbf is in use. Make sure that boths phpcs and phpcbf are available in this session."
+    return 1
+  fi
+
+  # Add App standard directory to allow ruleset customisations.
+  create_app_standards
+
+  local installed_paths=""
+  # Traverse all known sniffs locations and check for their existence before
+  # setting.
+  local count=0
+  while [ "x${paths[count]}" != "x" ]
+  do
+     # Replace path tokens.
+     standard_path=${paths[count]}
+     standard_path=$(replace_token "$standard_path" "vendor" "$(get_composer_vendor_dir)")
+     standard_path=$(replace_token "$standard_path" "dcr" "$(get_dcr_dir)")
+     standard_path=$(replace_token "$standard_path" "current" "$(get_current_dir)")
+     standard_path=$(replace_token "$standard_path" "project" "$(get_conf_dir)")
+
+     if [ -d $standard_path ] ; then
+      installed_paths=${installed_paths},${standard_path}
+     fi
+     count=$(( $count + 1 ))
+  done
+
+  if [ -z "${installed_paths}" ] ; then
+    secho changed "No valid standards' paths provided."
+  fi
+
+  # Remove leading comma.
+  installed_paths=${installed_paths:1}
+
+  codesniffer_config_set $command_phpcs installed_paths $installed_paths
+  codesniffer_config_set $command_phpcbf installed_paths $installed_paths
+  secho changed "Set installed_path to $installed_paths."
+}
+
+#
+# Replace token in provided subject.
+#
+replace_token() {
+  local subject=$1
+  local token=$2
+  local replacement=$3
+  local command_sed=$(which sed)
+  echo $(echo $subject | $command_sed -e "s?%${token}%?${replacement}?g")
+}
+
+#
+# Set installed_path value for codesniffer.
+#
+codesniffer_config_set() {
+  local command=$1
+  local name=$2
+  local value=$3
+  $command --config-set $name $value > /dev/null
+}
+
+#
+# Install JSCS.
+#
+install_jscs() {
+  local command_npm=$(which npm)
+
+  # Install JSCS.
+  $command_npm list jscs >> /dev/null
+  local jscs_installed=$?
+
+  if [ $jscs_installed -eq 0 ] ; then
+    secho status "JSCS is already installed"
+  else
+    $command_npm install jscs
+    secho changed "Installed JSCS"
+  fi
+}
+
+#
+# Register JSCS standards.
+#
+register_jscs_standards() {
+  local command_phpcs=$(which phpcs)
+  local jscs_path=$(npm bin)
+
+  # Create JSCS standards and configs.
+  create_jscs_standards
+
+  # Set JSCS binary path.
+  codesniffer_config_set $command_phpcs "jscs_path" "$jscs_path"
+}
+
+#
+# Create JSCS standards and configs.
+#
+create_jscs_standards() {
+  local src_jscs_conf=$(get_dcr_dir)/$DCR_JSCSRC_CONF_EXAMPLE
+  local dst_file=$(get_conf_dir)/$DCR_JSCSRC_CONF
+  if [ -f $dst_file ] ; then
+    secho status "Skipping copying of $DCR_JSCSRC_CONF file - file $dst_file exists."
+  else
+    cp $src_jscs_conf $dst_file
+    secho changed "Copied example $DCR_JSCSRC_CONF file $src_jscs_conf to $dst_file."
+  fi
+}
+
+#
+# Validate DCR installation.
+#
+validate_install() {
+  which dcr>/dev/null
+  local code=$?
+  if [ "$code" == 0 ]; then
+    secho changed "DCR was successfully installed and is available in current session"
+  else
+    secho error "DCR was not successfully installed and is not available in current session"
+  fi
+}
+
+#
+# Get DCR file location.
+#
+get_dcr() {
+  echo $(get_realpath "${BASH_SOURCE[0]}")
+}
+
+#
+# Get 'dcr' file location directory.
+#
+get_dcr_dir() {
+  echo $(_directory $(get_dcr))
+}
+
+#
+# Get the directory where script was invoked.
+#
+get_current_dir() {
+  echo $(pwd)
+}
+
+#
+# Get the directory where configuration file resides.
+#
+get_conf_dir() {
+  echo $(_directory $(get_conf_file))
 }
 
 #
 # Get conf file location.
 #
 get_conf_file() {
-  root_dir=$(get_root_dir)
-  conf_files=(
+  upfind "$DCR_CONF"
+return 0
+
+  # @todo: Improve lookup to allow any children depth.
+  local conf_files=(
     # Current dir.
-    $DCR_CURRENT_DIR/$CONF
-    # Dir above current.
-    $(dirname $DCR_CURRENT_DIR)/$DCR_CONF
-    # Root dir.
-    $root_dir/$DCR_CONF
-    # Dir above root.
-    $(dirname $root_dir)/$DCR_CONF
+    $(get_current_dir)/$DCR_CONF
+    # Parent dir to current.
+    $(dirname $(get_current_dir))/$DCR_CONF
+    # Grandparent dir to current.
+    $(dirname $(dirname $(get_current_dir)))/$DCR_CONF
   )
+
   # Traverse all known config locations.
-  matched_conf_file=""
-  count=0
+  local matched_conf_file=""
+  local count=0
   while [ "x${conf_files[count]}" != "x" ]
   do
     if [ -f "${conf_files[count]}" ] ; then
@@ -358,6 +515,85 @@ get_conf_file() {
   done
 
   echo $matched_conf_file
+}
+
+#
+# Get composer home directory.
+#
+get_composer_home_dir() {
+  local tail=$(which tail)
+  echo $(composer config -g home 2>&1|tail -n 1)
+}
+
+#
+# Get composer bin directory.
+#
+get_composer_bin_dir() {
+  local tail=$(which tail)
+  local bin_dir=$(composer config -g bin-dir 2>&1|tail -n 1)
+  local conf_dir=$(get_conf_dir)
+
+  if [ -z "$conf_dir" ]; then
+    return 1
+  fi
+  echo $([ "$(install_is_global)" == 0 ] && echo $(get_composer_home_dir)/$bin_dir || echo $conf_dir/$bin_dir)
+}
+
+#
+# Get composer vendor directory.
+#
+get_composer_vendor_dir() {
+  local tail=$(which tail)
+  local vendor_dir=$(composer config -g vendor-dir 2>&1|tail -n 1)
+  local conf_dir=$(get_conf_dir)
+
+  if [ -z "$conf_dir" ]; then
+    return 1
+  fi
+  echo $([ "$(install_is_global)" == 0 ] && echo $(get_composer_home_dir)/$vendor_dir || echo $conf_dir/$vendor_dir)
+}
+
+#
+# Check if DCR is installed globally.
+#
+install_is_global() {
+  local composer_home=$(get_composer_home_dir)
+  local dcr_dir=$(get_dcr_dir)
+  if [[ "$dcr_dir" =~ "$composer_home" ]]; then
+    # DCR is ran from global context.
+    return 0
+  else
+    # DCR is ran from local context.
+    return 1
+  fi
+}
+
+#
+# Get install type as a string.
+#
+get_install_type() {
+  echo $([ "$(install_is_global)" == 0 ] && echo 'Global' || echo 'Local')
+}
+
+#
+# Find file in current and all parent directories.
+#
+upfind() {
+  local command_find=$(which find);
+  local current_dir=$(get_current_dir)
+  local result=""
+
+  while [[ $PWD != / ]] ; do
+    result=$($command_find "$PWD"/ -maxdepth 1 -name "$@")
+    if [ -n "$result" ]; then
+      break
+    fi
+    cd ..
+  done
+
+  cd $current_dir
+
+  echo $result
 }
 
 #
@@ -380,23 +616,265 @@ parse_yaml() {
 }
 
 #
+# Status echo.
+#
+secho(){
+  local type=$1
+  local message=$2
+  case "$type" in
+    status) cecho blue "=> $message";;
+    changed) cecho green "=> $message";;
+    error) cecho red "=> $message";;
+    *) echo $message
+  esac
+}
+
+#
 # Colored echo.
 #
 cecho() {
-  local code="\033["
-  case "$1" in
-    black  | bk) color="${code}0;30m";;
-    red    |  r) color="${code}1;31m";;
-    green  |  g) color="${code}1;32m";;
-    yellow |  y) color="${code}1;33m";;
-    blue   |  b) color="${code}1;34m";;
-    purple |  p) color="${code}1;35m";;
-    cyan   |  c) color="${code}1;36m";;
-    gray   | gr) color="${code}0;37m";;
-    *) local text="$1"
+  local prefix="\033["
+  local input_color=$1
+  local message="$2"
+
+  local color=""
+  case "$input_color" in
+    black  | bk) color="${prefix}0;30m";;
+    red    |  r) color="${prefix}1;31m";;
+    green  |  g) color="${prefix}1;32m";;
+    yellow |  y) color="${prefix}1;33m";;
+    blue   |  b) color="${prefix}1;34m";;
+    purple |  p) color="${prefix}1;35m";;
+    cyan   |  c) color="${prefix}1;36m";;
+    gray   | gr) color="${prefix}0;37m";;
+    *) message="$1"
   esac
-  [ -z "$text" ] && local text="$color$2${code}0m"
-  echo -e "$text"
+
+  # Format message with color codes, but only if in terminal and a correct color
+  # was provided.
+  [ -t 1 ] && [ -n "$color" ] && message="${color}${message}${prefix}0m"
+
+  echo -e "$message"
 }
+
+################################################################################
+# realpath-lib : realpath library for bash file path resolution and validation.
+################################################################################
+# https://github.com/AsymLabs/realpath-lib
+#
+# Huge thanks to teh authors!
+#
+# This library is included directly, because sourcing it requires to know
+# original file path, which is the whole reason why this library is required in
+# the first place.
+################################################################################
+readonly RPL_VERSION='2013.11.19.00'
+readonly RPL_SYMLINK_LIMIT='40'
+if [[ -z "$set_max_depth" ]]
+then
+    set_max_depth=5
+fi
+
+# _exit_states : simple exit states array that corresponds (one to one) with
+# the array _exit_solutions[] below.
+readonly _exit_states=(
+    'Normal exit status, exited successfully'
+    'No file found, special file type or broken symlink issues'
+    'General path to file assembly/construction issues'
+    'Physical path to file assembly/resolution issues'
+    'Exceeded symlink recursion depth (max=$set_max_depth)'
+    'Exceeded symlink recursion limit (built-in or kernel)'
+    'Symlink circular reference issue has been detected'
+    "Cannot locate utility 'ls', cannot proceed further"
+    'Unspecified or unknown condition, posssible issues'
+)
+
+# _exit solutions : used with error logs - do not alter! Must have one entry
+# for each of _exit_states[].
+readonly _exit_solutions=(
+    'No solution is needed for normal exit status'
+    'Check that file path exists, is not special and is not broken'
+    'Path may be empty, may have syntax errors and/or special symbols'
+    'Path may be empty, may have syntax errors and/or special symbols'
+    "Alter max ($set_max_depth) by increasing 'set_max_depth'"
+    'No solution offered for exceeding symlink recursion limit'
+    'Symlink circular reference should be investigated manually'
+    "Enable 'set_logical=true' or install Posix utility 'ls'"
+    'Cannot provide solution for unspecified or unknown errors'
+)
+
+# _unroll array : unroll an array passed by reference, in this case the history
+# of links.
+function _unroll(){
+    local _el                # element.
+    local _cntr=0            # counter.
+    local _array=$1[@]       # array by ref.
+    for _el in ${!_array}    # unroll array.
+    do
+        printf 'L [%02d] -> %s\n' "$_cntr" "$_el" 1>&2
+        (( _cntr++ ))
+    done
+}
+
+# _log_error code [fatal] : log according to return value (private function).
+# use optional argument 'fatal' to exit execution - send to stderr.
+function _log_error(){
+    local _code _maxm
+    _code=$1
+    _maxm=$(( ${#_exit_states[@]} - 1 ))
+    (( $_code > $_maxm )) && _code=$_maxm
+    printf 'E [%02d] %s ...\n-----> %s ...\n' "$_code" "${_exit_states[$_code]}" "${_exit_solutions[$_code]}" 1>&2
+    [[ "$2" = 'fatal' ]] && exit $_code
+}
+
+# _file "path/to/file" : print the file of a given path (private function).
+function _file(){
+    [[ -n "$1" ]] && printf '%s' "${1##*/}"
+}
+
+# _directory "path/to/file" : get the directory of a path (private function)
+function _directory(){
+    [[ -n "$1" ]] && printf '%s' "${1%/*}"
+}
+
+# _cd "path/to/file" : change to the directory of a path (private function).
+function _cd(){
+    cd "$(_directory "$1")" 2>/dev/null
+}
+
+# GET_REALPATH
+# get_realpath "path/to/file" : echo the realpath as logical or physical,
+# depending upon the environment settings.
+#
+# Fri Nov 15 10:08:53 GMT 2013 : Major revision includes the introduction of
+# recursion and production of error messages to stderr.  Also added errors
+# related to recursion depth controls.
+#
+# DESIGN NOTE: Errors are permitted ONLY within this function by design.  All
+# other functions reflect return values, or exit based upon the conditions
+# generated and emitted by this function.  This is done to ensure that return
+# conditions and error messages are not duplicated.
+function get_realpath(){
+    # 0 : Pass.
+    # 1 : Fail : no file found/symlink broken/not regular file errors.
+    # 2 : Fail : physical file path assembly/resolution error.
+    # 3 : Fail : logical or physical path assembly/construction error.
+    # 4 : Fail : exceeded symlink max specified recursion error.
+    # 5 : Fail : exceeded symlink system limit recusion error.
+    # 6 : Fail : symlink circular reference detection error.
+    # 7 : Fail : the utility 'ls' does not exist error.
+
+    # File must exist, must be regular, and symlink cannot be broken.
+    if [[ -n "$set_strict" ]]; then
+        [[ ! -f "$1" ]] && {
+            _log_error 1                               # emit error 1.
+            return 1                                   # throw status 1.
+        }
+    fi
+
+    # Declare locals/initialize some.
+    local _el         # element of array
+    local _ls         # ls command result
+    local _lk         # next symlink path
+    local _lkdir      # symlink directory
+    local _lkfile     # symlink file name
+    local _pd='pwd'   # present directory
+    local _cntr=0     # recursion counter
+    local _path="$1"  # path string cache
+    local -a _paths   # paths history array
+
+    # Begin procedures.
+    if [[ -z "$set_logical" ]]
+    then
+
+        # Reset _pd
+        _pd='pwd -P'
+
+        # Look for symlinked file.
+        if [[ -L "$_path" ]]; then
+
+            # Check that ls exists or throw.
+            hash ls || {
+                _log_error 7                           # emit error 7.
+                return 7                               # throw status 7.
+            }
+
+            # Recurse through link chain.
+            while [[ -L "$_path" ]]
+            do
+
+                # Set temporaries, assemble path or throw.
+                _ls="$( ls -dl "$_path" 2>/dev/null )" &&
+                _lk="$( printf '%s' "${_ls#*"${_path} -> "}" )" &&
+                _lkdir="$( _cd "$_path"; _cd "$_lk"; $_pd )" &&
+                _lkfile="$(_file "$_lk")" && {
+                    [[ -z "$_lkdir" ]] && _path="$_lkfile" || _path="$_lkdir"/"$_lkfile"
+                } || {
+                    _log_error 3                       # emit error 3.
+                    return 3                           # throw status 3.
+                }
+
+                # Enforce circular reference detection. This is a brute force
+                # method, stores history.  If detected, unwinds full chain
+                # history to stderr and throws.
+                (( $_cntr )) && {                      # min two elements.
+                    for _el in ${_paths[@]}
+                    do
+                        [[ "$_el" == "$_path" ]] && {  # find duplicate.
+                            _paths[$_cntr]="$_path"    # insert duplicate.
+                            _unroll _paths             # unroll paths.
+                            _log_error 6               # emit error 6.
+                            return 6                   # throw status 6.
+                        }
+                    done
+                }
+
+                # Store history.
+                _paths[$_cntr]="$_path"
+
+                # Increment.
+                (( _cntr++ ))
+
+                # Enforce user specified maximum recursion $set_max_depth or
+                # throw.
+                (( $_cntr == $set_max_depth )) && {
+                    _unroll _paths                     # unroll paths.
+                    _log_error 4                       # emit error 4.
+                    return 4                           # throw status 4.
+                }
+
+                # Enforce built-in depth limit $RPL_SYMLINK_LIMIT - overrides
+                # custom environment set_max_depth and throws.
+                (( $_cntr == $RPL_SYMLINK_LIMIT )) && {
+                    _unroll _paths                     # unroll paths.
+                    _log_error 5                       # emit error 5.
+                    return 5                           # throw status 5.
+                }
+
+            done
+
+            echo "$_path"                              # emit path.
+            return 0                                   # throw status 0.
+
+       fi
+
+    fi
+
+    # Resolve links, assemble path or throw.
+    _lkdir="$( _cd "$_path"; $_pd )" &&
+    _lkfile="$(_file "$_path")" && {
+        [[ -z "$_lkdir" ]] && _path="$_lkfile" || _path="$_lkdir"/"$_lkfile"
+    } || {
+        _log_error 3                                   # emit error 3.
+        return 3                                       # throw status 3.
+    }
+
+    echo "$_path"                                      # emit path.
+    return 0                                           # throw status 0.
+
+}
+################################################################################
+# end of realpath-lib
+################################################################################
 
 main "$@"
