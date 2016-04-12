@@ -4,12 +4,6 @@
 #
 # A lightweight wrapper around phpcs.
 #
-# Installation (global):
-# 1. Pull all dependencies:
-# composer global require alexdesignworks/dcr
-# 2. Link and copy required files (composer does not let to execute scripts):
-# ~/.console/vendor/bin/dcr install && ~/.profile
-#
 # Installation (local):
 # 1. Pull all dependencies:
 # composer require alexdesignworks/dcr
