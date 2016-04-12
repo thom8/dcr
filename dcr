@@ -66,6 +66,8 @@ show_help() {
   echo "Lint:"
   echo "dcr [--explain] [--brief] [*phpcs options] [<file or dir>]"
   echo
+  echo "info,           Show DCR installation information"
+  echo "--info"
   echo "explain,        Show sniff codes in all reports"
   echo "--explain"
   echo "--brief         Show check progress only (no report). Useful for CI."
@@ -95,8 +97,12 @@ main() {
   for i in "$@"
   do
     case $i in
-      --help)
+      --help|help)
       show_help
+      return
+      ;;
+      --info|info)
+      install_info
       return
       ;;
       install)

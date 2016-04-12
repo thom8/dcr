@@ -19,6 +19,11 @@ setup() {
   assert_equal "The installed coding standards are MySource, PEAR, PHPCS, PSR1, PSR2, Squiz, Zend, Drupal, DrupalPractice, DCR and App" "$output"
 }
 
+@test "Installation info is available" {
+  run dcr info
+  assert_contains "DCR installation information" "$output"
+}
+
 @test "Single valid review passes" {
   run dcr $DCR_FIXTURES_DIR/hooks.valid.php
   assert_success
