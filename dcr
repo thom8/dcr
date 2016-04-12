@@ -240,7 +240,7 @@ install() {
 
   validate_install
 
-  return 0
+  return $?
 }
 
 #
@@ -466,8 +466,10 @@ validate_install() {
   local code=$?
   if [ "$code" == 0 ]; then
     secho changed "DCR was successfully installed and is available in current session"
+    return 0
   else
     secho error "DCR was not successfully installed and is not available in current session"
+    return 1
   fi
 }
 
