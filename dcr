@@ -128,9 +128,6 @@ main() {
     esac
   done
 
-upfind "$DCR_CONF"
-return 0
-
   local project_dir=$(get_conf_dir)
   local dcr_bin_dir=$(get_dcr_dir)
   local current_dir=$(get_current_dir)
@@ -489,32 +486,7 @@ get_conf_dir() {
 # Get conf file location.
 #
 get_conf_file() {
-  upfind "$DCR_CONF"
-return 0
-
-  # @todo: Improve lookup to allow any children depth.
-  local conf_files=(
-    # Current dir.
-    $(get_current_dir)/$DCR_CONF
-    # Parent dir to current.
-    $(dirname $(get_current_dir))/$DCR_CONF
-    # Grandparent dir to current.
-    $(dirname $(dirname $(get_current_dir)))/$DCR_CONF
-  )
-
-  # Traverse all known config locations.
-  local matched_conf_file=""
-  local count=0
-  while [ "x${conf_files[count]}" != "x" ]
-  do
-    if [ -f "${conf_files[count]}" ] ; then
-      matched_conf_file=${conf_files[count]}
-      break
-    fi
-    count=$(( $count + 1 ))
-  done
-
-  echo $matched_conf_file
+  echo $(upfind "$DCR_CONF")
 }
 
 #
