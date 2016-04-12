@@ -1,20 +1,15 @@
 machine:
-  php:
-    version: 5.3.10
+    version: 5.6.2
   environment:
    PATH: ${HOME}/${CIRCLE_PROJECT_REPONAME}/vendor/bin:${PATH}
 
 dependencies:
   pre:
-  # Update composer to the latest version.
-  - sudo composer self-update
   # Install bats CLI testing.
   - sudo add-apt-repository ppa:duggan/bats --yes
   - sudo apt-get update -qq
   - sudo apt-get install -qq bats
   override:
-  # Refresh environment variables.
-  - phpenv rehash
   # Run installation of all dependencies unsing composer locally.
   - cd $HOME/$CIRCLE_PROJECT_REPONAME && composer config -g github-oauth.github.com $GITHUB_TOKEN
   - cd $HOME/$CIRCLE_PROJECT_REPONAME && composer install
