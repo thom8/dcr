@@ -287,8 +287,8 @@ symlink_file() {
   local dst=$2
 
   if [ ! -L "$dst" ] ; then
-    ln -s src dst
-    echo "Symlinked $src into $dst"
+    ln -s $src $dst
+    secho changed "Symlinked $src into $dst"
   fi
 }
 
