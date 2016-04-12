@@ -533,7 +533,12 @@ get_composer_bin_dir() {
   if [ -z "$conf_dir" ]; then
     return 1
   fi
-  echo $([ "$(install_is_global)" == 0 ] && echo $(get_composer_home_dir)/$bin_dir || echo $conf_dir/$bin_dir)
+
+  if $(install_is_global) ; then
+    echo $(get_composer_home_dir)/$bin_dir
+  else
+    echo $conf_dir/$bin_dir
+  fi
 }
 
 #
@@ -547,7 +552,12 @@ get_composer_vendor_dir() {
   if [ -z "$conf_dir" ]; then
     return 1
   fi
-  echo $([ "$(install_is_global)" == 0 ] && echo $(get_composer_home_dir)/$vendor_dir || echo $conf_dir/$vendor_dir)
+
+  if $(install_is_global); then
+    echo $(get_composer_home_dir)/$vendor_dir
+  else
+    echo $conf_dir/$vendor_dir
+  fi
 }
 
 #
@@ -569,7 +579,11 @@ install_is_global() {
 # Get install type as a string.
 #
 get_install_type() {
-  echo $([ "$(install_is_global)" == 0 ] && echo 'Global' || echo 'Local')
+  if $(install_is_global) ; then
+    echo 'Global'
+  else
+    echo 'Local'
+  fi
 }
 
 #
