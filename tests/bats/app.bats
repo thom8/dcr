@@ -7,7 +7,7 @@ load test_helper
 
 setup() {
   if [ -z "$DCR_PROJECT_ROOT" ]; then
-    DCR_PROJECT_ROOT="../"
+    DCR_PROJECT_ROOT="."
   fi
 
   source ~/.profile

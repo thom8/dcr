@@ -7,7 +7,7 @@
 #
 setup() {
   if [ -z "$DCR_PROJECT_ROOT" ]; then
-    PROJECT_ROOT="../"
+    PROJECT_ROOT="."
   fi
 }
 
