@@ -120,7 +120,7 @@ class DCR_Sniffs_Files_LineLengthSniff extends Generic_Sniffs_Files_LineLengthSn
     $prev_comment = $stack_ptr;
     $last_comment = $stack_ptr;
     while (($prev_comment = $phpcs_file->findPrevious(array(T_COMMENT), ($last_comment - 1), NULL, FALSE)) !== FALSE) {
-      if ($tokens[$prev_comment]['line'] !== ($tokens[$last_comment]['line'] - 1)) {
+      if (isset($tokens[$last_comment]['line']) && $tokens[$prev_comment]['line'] !== ($tokens[$last_comment]['line'] - 1)) {
         return FALSE;
       }
 
