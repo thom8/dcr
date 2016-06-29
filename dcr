@@ -745,7 +745,7 @@ function _file(){
 
 # _directory "path/to/file" : get the directory of a path (private function)
 function _directory(){
-    [[ -n "$1" ]] && printf '%s' "${1%/*}"
+    [[ -n "$1" ]] && local string=${1%/*} && string=${string%/} && printf '%s' "$string"
 }
 
 # _cd "path/to/file" : change to the directory of a path (private function).
