@@ -146,7 +146,7 @@ main() {
   # Add a guard for running from project dir or one of its sub-dirs to make sure
   # that all paths are properly resolved.
   if [[ ! "$current_dir" =~ "$project_dir" ]] ; then
-    secho error "dcr has to be run from project dir (${project_dir}) or one of it's sub-directories"
+    secho error "dcr has to be run from directory where ${DCR_CONF} is located or one of it's sub-directories"
     return 1
   fi
 
