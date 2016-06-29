@@ -14,6 +14,8 @@ cd your_project_dir
 dcr init
 ```
 
+Global build status: [![Circle CI](https://circleci.com/gh/alexdesignworks/dcr-global-demo.svg?style=shield)](https://circleci.com/gh/alexdesignworks/dcr-global-demo)
+
 ### 2. Local per-project installation
 ```
 composer require alexdesignworks/dcr
@@ -63,7 +65,7 @@ Simply put - convenience. Run code review by only one command `dcr`.
 1. **Ease of install:** `composer require alexdesignworks/dcr`
 2. **Less false-positives:** Drupal-specific exceptions allow to have clean DCR output.
 3. **Simple call:** no need to call phpcs with tones of confusing parameters. Just use `dcr`.
-4. **JS Liniting** no need to install standalone JS linter.
+4. **JS Linting:** no need to install standalone JS linter.
 5. **Project-based configuration:** use `.dcr.yml` file to configure `dcr` for each project and make sure that your teammates are using exactly the same standards.
 
 ### Why is it a separate tool?
