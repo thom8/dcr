@@ -1,13 +1,17 @@
 #!/usr/bin/env bats
 #
-# App tests for DCR.
+# Application tests for DCR.
 #
 
 load test_helper
 
 setup() {
+  if [ -z "$DCR_PROJECT_ROOT" ]; then
+    DCR_PROJECT_ROOT="."
+  fi
+
   source ~/.profile
-  fixtures_dir=tests/standards_fixtures
+  DCR_FIXTURES_DIR=$DCR_PROJECT_ROOT/tests/standards_fixtures
 }
 
 @test "Custom vendor standards are picked up" {
@@ -15,43 +19,48 @@ setup() {
   assert_equal "The installed coding standards are MySource, PEAR, PHPCS, PSR1, PSR2, Squiz, Zend, Drupal, DrupalPractice, DCR and App" "$output"
 }
 
+@test "Installation info is available" {
+  run dcr info
+  assert_contains "DCR installation information" "$output"
+}
+
 @test "Single valid review passes" {
-  run dcr $fixtures_dir/hooks.valid.php
+  run dcr $DCR_FIXTURES_DIR/hooks.valid.php
   assert_success
 }
 
 @test "Multiple valid reviews passes" {
-  run dcr $fixtures_dir/hooks.valid.php $fixtures_dir/hooks.valid2.php
+  run dcr $DCR_FIXTURES_DIR/hooks.valid.php $DCR_FIXTURES_DIR/hooks.valid2.php
   assert_success
 }
 
 @test "Single invalid review fails" {
-  run dcr $fixtures_dir/hooks.invalid.php
+  run dcr $DCR_FIXTURES_DIR/hooks.invalid.php
   assert_failure
 }
 
 @test "Multiple invalid review fails" {
-  run dcr $fixtures_dir/hooks.invalid.php $fixtures_dir/hooks.invalid2.php
+  run dcr $DCR_FIXTURES_DIR/hooks.invalid.php $DCR_FIXTURES_DIR/hooks.invalid2.php
   assert_failure
 }
 
 @test "Multiple valid and invalid review fails" {
-  run dcr $fixtures_dir/hooks.valid.php $fixtures_dir/hooks.invalid.php
+  run dcr $DCR_FIXTURES_DIR/hooks.valid.php $DCR_FIXTURES_DIR/hooks.invalid.php
   assert_failure
 }
 
 @test "Dir with valid items pass" {
-  run dcr $fixtures_dir/valid
+  run dcr $DCR_FIXTURES_DIR/valid
   assert_success
 }
 
 @test "Dir with invalid items fail" {
-  run dcr $fixtures_dir/invalid
+  run dcr $DCR_FIXTURES_DIR/invalid
   assert_failure
 }
 
 @test "Dir with valid and invalid items fail" {
-  run dcr $fixtures_dir
+  run dcr $DCR_FIXTURES_DIR
   assert_failure
 }
 
@@ -65,25 +74,25 @@ setup() {
 }
 
 @test "Parameter --explain works" {
-  run dcr --explain $fixtures_dir/hooks.invalid.php
+  run dcr --explain $DCR_FIXTURES_DIR/hooks.invalid.php
   assert_failure
 
   assert_contains "(Drupal.Commenting.FunctionComment.WrongStyle)" "${lines[5]}"
 }
 
 @test "Parameter passthrough works" {
-  run dcr --standard=PSR1 $fixtures_dir/hooks.invalid.php
+  run dcr --standard=PSR1 $DCR_FIXTURES_DIR/hooks.invalid.php
   assert_success
 }
 
 @test "Fixing code works" {
-  cp $fixtures_dir/hooks.invalid.php $fixtures_dir/hooks.invalid.tmp.php
+  cp $DCR_FIXTURES_DIR/hooks.invalid.php $DCR_FIXTURES_DIR/hooks.invalid.tmp.php
 
   # Run the code fixing.
-  run bash -c "dcr fix $fixtures_dir/hooks.invalid.tmp.php"
+  run bash -c "dcr fix $DCR_FIXTURES_DIR/hooks.invalid.tmp.php"
 
-  run diff $fixtures_dir/hooks.invalid.php $fixtures_dir/hooks.invalid.tmp.php
+  run diff $DCR_FIXTURES_DIR/hooks.invalid.php $DCR_FIXTURES_DIR/hooks.invalid.tmp.php
   assert_failure
 
-  rm $fixtures_dir/hooks.invalid.tmp.php
+  rm $DCR_FIXTURES_DIR/hooks.invalid.tmp.php
 }
