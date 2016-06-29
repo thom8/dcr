@@ -276,6 +276,7 @@ install_info() {
   echo " Composer vendor:       " $(get_composer_vendor_dir)
   echo " Composer bin:          " $(get_composer_bin_dir)
   echo " Current directory:     " $(get_current_dir)
+  echo " Discovered standards:  " $(get_discovered_standards)
   echo "--------------------------------------------------------------------------------"
   echo
 }
@@ -622,6 +623,18 @@ get_jscs_bin_dir() {
     command=$(npm bin)
   fi
   echo $command
+}
+
+#
+# Get discovered standards.
+#
+get_discovered_standards() {
+  local command_phpcs=$(which phpcs)
+  local prefix="The installed coding standards are "
+  local prefix_size=${#prefix}
+  local output=$($command_phpcs -i)
+  output=${output:prefix_size}
+  echo $output
 }
 
 #
