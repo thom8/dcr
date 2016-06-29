@@ -41,6 +41,7 @@ Or use `composer.json`:
 * <del>Automated fix</del> DONE `dcr fix`
 * <del>Allow running only from project root dir or any subdirs</del> DONE
 * <del>Add JS linting</del> DONE Using JSCS
+* Global installation outside of project
 * Limit files scan to N failed files
 * Scan only files changed in current branch comparing to a `main` branch.
 
