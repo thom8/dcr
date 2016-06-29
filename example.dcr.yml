@@ -1,7 +1,7 @@
 #
 # DCR configuration file.
 #
-# Run: dcr install or copy manually to your project's root.
+# Run: `dcr install` or copy manually to your project's root.
 #
 
 # Space (!) separated list of files or directories to scan.
