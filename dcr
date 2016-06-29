@@ -4,24 +4,19 @@
 #
 # A lightweight wrapper around phpcs, phpcbf and jscs.
 #
-# Installation (local):
-# 1. Pull all dependencies:
+# Local installation (run from project directory):
 # composer require alexdesignworks/dcr
-# 2. Link and copy required files (composer does not let to execute scripts):
 # source vendor/bin/dcr install
 #
-# Installation (global):
-# 1. Pull all dependencies:
+# Global installation (run from any directory; composer bin directory must
+# already be set in PATH):
 # composer global require alexdesignworks/dcr
-# 2. Link and copy required files (composer does not let to execute scripts):
-# source dcr install
+# dcr install
 #
 # Usage: dcr --help for usage.
 #
 # .dcr.yml file can be stored in the root of your project (same level with
 # 'vendor' dir) or in it's parent directory.
-#
-# dcr must be invoked from project root or one of it's sub-directories.
 #
 
 # Configuration file name.
@@ -60,16 +55,12 @@ readonly DCR_PATH_FILE=$HOME/.profile
 show_help() {
   echo "Drupal Code Review"
   echo
-  echo "Installation (global):"
-  echo "composer global require alexdesignworks/dcr"
-  echo "\$(composer config -g bin-dir)/dcr install"
-  echo
-  echo "Installation (local):"
-  echo "composer require alexdesignworks/dcr"
-  echo "\$(composer config bin-dir)/dcr install"
+  echo "Initialise project:"
+  echo "Create all necessary DCR files and directories in current directory."
+  cecho green "dcr init"
   echo
   echo "Lint:"
-  echo "dcr [--explain] [--brief] [*phpcs options] [<file or dir>]"
+  cecho green "dcr [--explain] [--brief] [*phpcs options] [<file or dir>]"
   echo
   echo "info,           Show DCR installation information"
   echo "--info"
@@ -80,7 +71,7 @@ show_help() {
   echo "file or dir     Custom file or directory to check."
   echo
   echo "Fix:"
-  echo "dcr fix [*phpcbf options] [<file or dir>]"
+  cecho green "dcr fix [*phpcbf options] [<file or dir>]"
   echo
   echo "fix             Fix all warnings and errors"
   echo "*phpcbf options Any phpcbf options ('phpcbf --help' for options list)."
@@ -107,10 +98,10 @@ main() {
       return
       ;;
       --info|info)
-      install_info
+      config_info
       return
       ;;
-      install)
+      install|init)
       install
       return
       ;;
@@ -227,7 +218,7 @@ install() {
   local command_cat=$(which cat)
 
   # Print installation information.
-  install_info
+  config_info
 
   # Config file is used to find current working directory, so the very first
   # check is to make sure that config file exist and create it if it does not.
@@ -263,7 +254,7 @@ install() {
 #
 # Installation information for all variables used.
 #
-install_info() {
+config_info() {
   echo "--------------------------------------------------------------------------------"
   echo " DCR installation information"
   echo "--------------------------------------------------------------------------------"
