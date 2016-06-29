@@ -35,7 +35,8 @@ readonly DCR_JSCSRC_CONF=".jscsrc"
 readonly DCR_JSCSRC_CONF_EXAMPLE=".jscsrc.drupal"
 
 # Directory with App standards.
-readonly DCR_APP_STANDARDS_DIR=dcr_standards
+readonly DCR_APP_STANDARDS_DIR=.dcr
+readonly DCR_APP_STANDARDS_DIR_SRC=dcr_standards
 
 # Array of known standards paths within vendor directory.
 # Use 'dcr -i' to check which standards are available.
@@ -344,16 +345,16 @@ create_app_standards() {
   local conf_dir=$(get_conf_dir)
 
   if [ -z "$conf_dir" ] ; then
-    secho error "Unable to copy $DCR_APP_STANDARDS_DIR directory"
+    secho error "Unable to copy $DCR_APP_STANDARDS_DIR_SRC directory"
     return 1
   fi
 
   # Add App standard directory to current dir to allow ruleset customisations.
   if [ ! -d "$conf_dir/$DCR_APP_STANDARDS_DIR" ] ; then
-    cp -r $(get_dcr_dir)/$DCR_APP_STANDARDS_DIR $conf_dir
-    secho changed "Copied $DCR_APP_STANDARDS_DIR directory to $conf_dir"
+    cp -r $(get_dcr_dir)/$DCR_APP_STANDARDS_DIR_SRC/* $conf_dir/$DCR_APP_STANDARDS_DIR
+    secho changed "Copied $DCR_APP_STANDARDS_DIR_SRC directory to $conf_dir/$DCR_APP_STANDARDS_DIR"
   else
-    secho status "$DCR_APP_STANDARDS_DIR directory already exists at $conf_dir"
+    secho status "$DCR_APP_STANDARDS_DIR directory already exists in $conf_dir"
   fi
 }
 
