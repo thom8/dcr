@@ -1,5 +1,28 @@
 {
   "name": "alexdesignworks/dcr",
+  "description": "Shell script wrapper around PHP_CodeSniffer and JSCS",
+  "keywords": [
+    "phpcs",
+    "lint",
+    "linter",
+    "jscs",
+    "jslint",
+    "drupal",
+    "standards"
+  ],
+  "homepage": "https://github.com/alexdesignworks/dcr",
+  "license": "GPL-2.0",
+  "authors": [
+    {
+      "name": "Alex Skrypnyk",
+      "email": "alexdesignworks@gmail.com",
+      "role": "Developer"
+    }
+  ],
+  "support": {
+    "issues": "https://github.com/alexdesignworks/dcr/issues",
+    "source": "https://github.com/alexdesignworks/dcr"
+  },
   "minimum-stability": "dev",
   "require": {
     "php": ">=5.3.9",

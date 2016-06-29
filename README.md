@@ -102,3 +102,6 @@ Yes! If you run `dcr fix` it will try to fix code in all files using `phpcbf` wi
 * <del>Add JS linting</del> DONE Using JSCS
 * Limit files scan to N failed files
 * Scan only files changed in current branch comparing to a `main` branch.
+
+## License
+GPL2
