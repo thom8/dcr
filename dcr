@@ -449,8 +449,8 @@ install_jscs() {
   if [ $jscs_installed -eq 0 ] ; then
     secho status "JSCS is already installed"
   else
-    secho changed "Installing JSCS"
     $command_npm install $command_global jscs
+    secho changed "Installed JSCS"
   fi
 }
 
