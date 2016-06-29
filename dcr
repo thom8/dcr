@@ -242,8 +242,14 @@ install() {
   # Separately add JS code sniffer.
   install_jscs
 
+  # To allow access to JSCS binary from anywhere in the system, npm's binary
+  # directory needs to be added to the $PATH environment variable.
+  add_environment_path $(get_jscs_bin_dir) $DCR_PATH_FILE
+
+  # Register JSCS standards.
   register_jscs_standards
 
+  # Validate that DCR was successfully installed.
   validate_install
 
   return $?
@@ -422,17 +428,22 @@ codesniffer_config_set() {
 # Install JSCS.
 #
 install_jscs() {
-  local command_npm=$(which npm)
+  local command_npm=$(get_npm)
+
+  command_global=""
+  if $(install_is_global) ; then
+    command_global=" -g "
+  fi
 
   # Install JSCS.
-  $command_npm list jscs >> /dev/null
+  $command_npm list $command_global jscs >> /dev/null
   local jscs_installed=$?
 
   if [ $jscs_installed -eq 0 ] ; then
     secho status "JSCS is already installed"
   else
-    $command_npm install jscs
-    secho changed "Installed JSCS"
+    secho changed "Installing JSCS"
+    $command_npm install $command_global jscs
   fi
 }
 
@@ -441,7 +452,7 @@ install_jscs() {
 #
 register_jscs_standards() {
   local command_phpcs=$(which phpcs)
-  local jscs_path=$(npm bin)
+  local jscs_path=$(get_jscs_bin_dir)
 
   # Create JSCS standards and configs.
   create_jscs_standards
@@ -584,6 +595,28 @@ get_install_type() {
   else
     echo 'Local'
   fi
+}
+
+#
+# Get npm path.
+#
+get_npm() {
+  echo $(which npm)
+}
+
+#
+# Get npm bin path.
+#
+# Automatically resolve to global path if this is a global installation.
+#
+get_jscs_bin_dir() {
+  local command=""
+  if $(install_is_global) ; then
+    command=$(npm bin -g)
+  else
+    command=$(npm bin)
+  fi
+  echo $command
 }
 
 #
