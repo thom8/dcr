@@ -352,6 +352,7 @@ create_app_standards() {
 
   # Add App standard directory to current dir to allow ruleset customisations.
   if [ ! -d "$conf_dir/$DCR_APP_STANDARDS_DIR" ] ; then
+    mkdir $conf_dir/$DCR_APP_STANDARDS_DIR
     cp -r $(get_dcr_dir)/$DCR_APP_STANDARDS_DIR_SRC/* $conf_dir/$DCR_APP_STANDARDS_DIR
     secho changed "Copied $DCR_APP_STANDARDS_DIR_SRC directory to $conf_dir/$DCR_APP_STANDARDS_DIR"
   else
