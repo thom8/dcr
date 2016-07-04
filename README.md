@@ -1,4 +1,9 @@
-# Drupal Code Review (DCR) [![Circle CI](https://circleci.com/gh/alexdesignworks/dcr.svg?style=shield)](https://circleci.com/gh/alexdesignworks/dcr)
+# Drupal Code Review (DCR) 
+
+[![Circle CI](https://circleci.com/gh/alexdesignworks/dcr.svg?style=shield)](https://circleci.com/gh/alexdesignworks/dcr)
+[![Latest Stable Version](https://poser.pugx.org/alexdesignworks/dcr/v/stable)](https://packagist.org/packages/alexdesignworks/dcr)
+[![Total Downloads](https://poser.pugx.org/alexdesignworks/dcr/downloads)](https://packagist.org/packages/alexdesignworks/dcr)
+[![License](https://poser.pugx.org/alexdesignworks/dcr/license)](https://packagist.org/packages/alexdesignworks/dcr)
 
 ### Bring all your code review dependencies with one command!
 
