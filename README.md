@@ -19,7 +19,7 @@ cd your_project_dir
 dcr init
 ```
 
-Global build status: [![Circle CI](https://circleci.com/gh/alexdesignworks/dcr-global-demo.svg?style=shield)](https://circleci.com/gh/alexdesignworks/dcr-global-demo)
+Global build status (https://github.com/alexdesignworks/dcr-global-demo): [![Circle CI](https://circleci.com/gh/alexdesignworks/dcr-global-demo.svg?style=shield)](https://circleci.com/gh/alexdesignworks/dcr-global-demo)
 
 ### 2. Local per-project installation
 ```
@@ -27,7 +27,7 @@ composer require alexdesignworks/dcr
 vendor/bin/dcr install && ~/.profile
 ```
 
-Local build status: [![Circle CI](https://circleci.com/gh/alexdesignworks/dcr-demo.svg?style=shield)](https://circleci.com/gh/alexdesignworks/dcr-demo)
+Local build status (https://github.com/alexdesignworks/dcr-demo): [![Circle CI](https://circleci.com/gh/alexdesignworks/dcr-demo.svg?style=shield)](https://circleci.com/gh/alexdesignworks/dcr-demo)
 
 ### 3. Install as composer dependency for specific project:
 In `composer.json`:
