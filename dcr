@@ -336,15 +336,18 @@ add_environment_path() {
 
   local command_grep=$(which grep)
   local command_cat=$(which cat)
-  if echo $PATH | $command_grep -ohq "$text"; then
-    secho status "Directory $text is already in PATH" $quiet
-  else
-    if $command_cat $path_file | $command_grep -ohq "PATH=$text:\$PATH\$"; then
-      secho status "Directory $text already exported into file $path_file" $quiet
-    else
-      echo "PATH=$text:\$PATH" >> $path_file;
-    fi
 
+  # Add directory to path file.
+  if $command_cat $path_file | $command_grep -ohq "PATH=$text:\$PATH\$"; then
+    secho status "Directory $text already exported into file $path_file" $quiet
+  else
+    echo "PATH=$text:\$PATH" >> $path_file;
+  fi
+
+  # Add directory to current session.
+  if echo $PATH | $command_grep -ohq "$text"; then
+    secho status "Directory $text is already in PATH for current session" $quiet
+  else
     export PATH=$text:$PATH
     if echo $PATH | $command_grep -ohq "$text"; then
       secho changed "Added directory $text to current session PATH" $quiet
