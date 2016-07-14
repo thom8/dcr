@@ -60,13 +60,15 @@ show_help() {
   cecho green "dcr [--quiet] init"
   echo
   echo "Lint:"
-  cecho green "dcr [--explain] [--brief] [*phpcs options] [<file or dir>]"
+  cecho green "dcr [--explain] [--brief] [--quiet] [--no-messages] [*phpcs options] [<file or dir>]"
   echo
   echo "info,           Show DCR installation information"
   echo "--info"
   echo "explain,        Show sniff codes in all reports"
   echo "--explain"
   echo "--brief         Show check progress only (no report). Useful for CI."
+  echo "--quiet         Do not show any output (use exit code only)."
+  echo "--no-messages   Do not show final messages (still show scan results)."
   echo "*phpcs options  Any phpcs options ('phpcs --help' for options list)."
   echo "file or dir     Custom file or directory to check."
   echo
@@ -86,6 +88,7 @@ main() {
   local command_phpcbf=$(which phpcbf)
   local binary=$command_phpcs
   local quiet=0
+  local no_messages=0
   local custom_options=""
   local custom_targets=""
   local passthrough_options=""
@@ -123,6 +126,10 @@ main() {
       quiet=1
       shift
       ;;
+      --no-messages)
+      no_messages=1
+      shift
+      ;;
       *)
       # Passthrough all unknown options.
       if [ "${i:0:1}" == "-" ] || [ "${i:0:2}" == "--" ]; then
@@ -142,7 +149,7 @@ main() {
   # Add a guard for running from project dir or one of its sub-dirs to make sure
   # that all paths are properly resolved.
   if [[ ! "$current_dir" =~ "$project_dir" ]] ; then
-    secho error "dcr has to be run from directory where ${DCR_CONF} is located or one of it's sub-directories"
+    secho error "dcr has to be run from directory where ${DCR_CONF} is located or one of it's sub-directories" $quiet
     return 1
   fi
 
@@ -151,7 +158,7 @@ main() {
 
   # Error if config does not exist.
   if [ "$conf_file" == "" ] ; then
-    secho error "Unable to open DCR config file. Please copy $dcr_bin_dir/$DCR_CONF_EXAMPLE to the project root."
+    secho error "Unable to open DCR config file. Please copy $dcr_bin_dir/$DCR_CONF_EXAMPLE to the project root." $quiet
     return 1
   fi
 
@@ -179,7 +186,7 @@ main() {
       custom_targets=$conf_targets
     elif [ "${passthrough_options}" == "" ] ; then
       # No options were passed and no options were read from config.
-      secho error "No targets were provided"
+      secho error "No targets were provided" $quiet
       return 1
     fi
   fi
@@ -191,22 +198,26 @@ main() {
 
   # Pass-through options always override any default and custom options.
   cd $project_dir
-  $binary $custom_options $passthrough_options $custom_targets
+  if [ "$quiet" == 1 ] ; then
+    $binary $custom_options $passthrough_options $custom_targets > /dev/null
+  else
+    $binary $custom_options $passthrough_options $custom_targets
+  fi
   local return_code=$?
   cd $DCR_CURRENT_DIR
 
   # Output message for phpcs.
   if [ "$binary" == "$command_phpcs" ] ; then
     # Output success message, but only if it was set in config and this is not
-    # a non-targeted run.
-    if [ ${return_code} -eq 0 ] && [ ${conf_success+x} ] && [[ ! "${passthrough_options}" =~ "-i" ]] ; then
+    # a non-targeted run and not quiet run and messages are not suppressed.
+    if [ ${return_code} -eq 0 ] && [ ${conf_success+x} ] && [[ ! "${passthrough_options}" =~ "-i" ]] && [ "$quiet" == 0 ] && [ "$no_messages" == 0 ] ; then
       echo
       cecho green "${conf_success}"
     fi
 
     # Output fail message, but only if it was set in config and this is not
-    # a non-targeted run.
-    if [ ${return_code} -eq 1 ] && [ ${conf_fail+x} ] && [[ ! "${passthrough_options}" =~ "-i" ]] ; then
+    # a non-targeted run and not quiet run and messages are not suppressed.
+    if [ ${return_code} -eq 1 ] && [ ${conf_fail+x} ] && [[ ! "${passthrough_options}" =~ "-i" ]] && [ "$quiet" == 0 ] && [ "$no_messages" == 0 ] ; then
       echo
       cecho red "${conf_fail}"
     fi
