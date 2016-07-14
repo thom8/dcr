@@ -70,6 +70,30 @@ assert_contains() {
   fi
 }
 
+#
+# Does not contain assertion.
+#
+assert_not_contain() {
+  if [[ ! "$2" =~ "$1" ]] ; then
+    return 0
+  else
+    { echo "string:   $2"
+      echo "contains: $1"
+    } | flunk
+  fi
+}
+
+#
+# Empty assertion.
+#
+assert_empty() {
+  if [[ "$1" == "" ]] ; then
+    return 0
+  else
+    { echo "string:   $1"
+    } | flunk
+  fi
+}
 
 #
 # Assertion output.

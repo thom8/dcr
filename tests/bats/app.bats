@@ -80,6 +80,19 @@ setup() {
   assert_contains "(Drupal.Commenting.FunctionComment.WrongStyle)" "${lines[5]}"
 }
 
+@test "Parameter --quiet suppresses output but preserves exit code" {
+  run dcr --quiet $DCR_FIXTURES_DIR/hooks.invalid.php
+  assert_failure
+  assert_empty "$output"
+}
+
+@test "Parameter --no-messages suppresses messages, output but preserves exit code and command output" {
+  run dcr --no-messages $DCR_FIXTURES_DIR/hooks.invalid.php
+  assert_failure
+  assert_contains "ERRORS AFFECTING" "$output"
+  assert_not_contain "Please fix errors above and re-run dcr" "$output"
+}
+
 @test "Parameter passthrough works" {
   run dcr --standard=PSR1 $DCR_FIXTURES_DIR/hooks.invalid.php
   assert_success
