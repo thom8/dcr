@@ -1,4 +1,4 @@
-# Drupal Code Review (DCR) 
+# Drupal Code Review (DCR)
 
 [![Circle CI](https://circleci.com/gh/alexdesignworks/dcr.svg?style=shield)](https://circleci.com/gh/alexdesignworks/dcr)
 [![Latest Stable Version](https://poser.pugx.org/alexdesignworks/dcr/v/stable)](https://packagist.org/packages/alexdesignworks/dcr)
@@ -14,7 +14,7 @@ There are 3 options:
 Install once, init for each project or run "as-is" to scan custom files.
 ```
 composer global require alexdesignworks/dcr
-dcr install && ~/.profile
+dcr install && source ~/.profile
 cd your_project_dir
 dcr init
 ```
@@ -24,7 +24,7 @@ Global build status (https://github.com/alexdesignworks/dcr-global-demo): [![Cir
 ### 2. Local per-project installation
 ```
 composer require alexdesignworks/dcr
-vendor/bin/dcr install && ~/.profile
+vendor/bin/dcr install && source ~/.profile
 ```
 
 Local build status (https://github.com/alexdesignworks/dcr-demo): [![Circle CI](https://circleci.com/gh/alexdesignworks/dcr-demo.svg?style=shield)](https://circleci.com/gh/alexdesignworks/dcr-demo)
