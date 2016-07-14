@@ -62,7 +62,7 @@ assert_equal() {
 #
 assert_contains() {
   if [[ "$2" =~ "$1" ]] ; then
-    /bin/true
+    return 0
   else
     { echo "string:   $2"
       echo "contains: $1"
