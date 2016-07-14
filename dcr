@@ -610,7 +610,7 @@ get_npm() {
 get_jscs_bin_dir() {
   local command=""
   if $(install_is_global) ; then
-    command=$(npm bin -g)
+    command=$(npm bin -g 2>/dev/null)
   else
     command=$(npm bin)
   fi
