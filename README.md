@@ -109,4 +109,4 @@ Yes! If you run `dcr fix` it will try to fix code in all files using `phpcbf` wi
 * Scan only files changed in current branch comparing to a `main` branch.
 
 ## License
-GPL2
+[GPL2](https://opensource.org/licenses/GPL-2.0)
