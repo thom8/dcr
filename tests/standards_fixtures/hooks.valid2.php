@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Test file for valid hooks implementations.
