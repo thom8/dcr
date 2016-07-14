@@ -57,7 +57,7 @@ show_help() {
   echo
   echo "Initialise project:"
   echo "Create all necessary DCR files and directories in current directory."
-  cecho green "dcr init"
+  cecho green "dcr [--quiet] init"
   echo
   echo "Lint:"
   cecho green "dcr [--explain] [--brief] [*phpcs options] [<file or dir>]"
@@ -85,6 +85,7 @@ main() {
   local command_phpcs=$(which phpcs)
   local command_phpcbf=$(which phpcbf)
   local binary=$command_phpcs
+  local quiet=0
   local custom_options=""
   local custom_targets=""
   local passthrough_options=""
@@ -102,7 +103,7 @@ main() {
       return
       ;;
       install|init)
-      install
+      install "$quiet"
       return
       ;;
       fix)
@@ -116,6 +117,10 @@ main() {
       ;;
       --brief)
       custom_options="${custom_options} -p --report-file=/dev/null"
+      shift
+      ;;
+      --quiet)
+      quiet=1
       shift
       ;;
       *)
@@ -214,39 +219,40 @@ main() {
 # Additional installation steps.
 #
 install() {
+  local quiet=$1
   local command_grep=$(which grep)
   local command_cat=$(which cat)
 
   # Print installation information.
-  config_info
+  config_info $quiet
 
   # Config file is used to find current working directory, so the very first
   # check is to make sure that config file exist and create it if it does not.
-  create_config_file
+  create_config_file $quiet
 
   # Make sure that DCR is symlink into composer bin.
-  symlink_file $(get_dcr) $(get_composer_bin_dir)/dcr
+  symlink_file $(get_dcr) $(get_composer_bin_dir)/dcr $quiet
 
   # To allow access to DCR binary from anywhere in the system, composer's binary
   # directory needs to be added to the $PATH environment variable.
-  add_environment_path $(get_composer_bin_dir) $DCR_PATH_FILE
+  add_environment_path $(get_composer_bin_dir) $DCR_PATH_FILE $quiet
 
   # Register code sniffer install path to phpcs config to allow proper standards
   # path resolution. This also handles paths for global and local installation.
-  register_codesniffer_standards
+  register_codesniffer_standards $quiet
 
   # Separately add JS code sniffer.
-  install_jscs
+  install_jscs $quiet
 
   # To allow access to JSCS binary from anywhere in the system, npm's binary
   # directory needs to be added to the $PATH environment variable.
-  add_environment_path $(get_jscs_bin_dir) $DCR_PATH_FILE
+  add_environment_path $(get_jscs_bin_dir) $DCR_PATH_FILE $quiet
 
   # Register JSCS standards.
-  register_jscs_standards
+  register_jscs_standards $quiet
 
   # Validate that DCR was successfully installed.
-  validate_install
+  validate_install $quiet
 
   return $?
 }
@@ -255,6 +261,12 @@ install() {
 # Installation information for all variables used.
 #
 config_info() {
+  local quiet=$1
+
+  if [ "$quiet" == 1 ] ; then
+    return
+  fi
+  
   echo "--------------------------------------------------------------------------------"
   echo " DCR installation information"
   echo "--------------------------------------------------------------------------------"
@@ -276,15 +288,16 @@ config_info() {
 # Validate that config file exists and create one if it does not.
 #
 create_config_file() {
+  local quiet=$1
   local conf_file=$(get_conf_file)
   local dcr_dir=$(get_dcr_dir)
 
   if [ -n "$conf_file" ] && [ -f $conf_file ] ; then
-    secho status "Skipping copying of config file - file $conf_file exists."
+    secho status "Skipping copying of config file - file $conf_file exists." $quiet
   else
     local new_conf_file=$(get_current_dir)/$DCR_CONF
     cp $dcr_dir/$DCR_CONF_EXAMPLE $new_conf_file
-    secho changed "Copied example config file $dcr_dir/$DCR_CONF_EXAMPLE to $new_conf_file."
+    secho changed "Copied example config file $dcr_dir/$DCR_CONF_EXAMPLE to $new_conf_file." $quiet
   fi
 }
 
@@ -294,13 +307,13 @@ create_config_file() {
 symlink_file() {
   local src=$1
   local dst=$2
+  local quiet=$3
 
   if [ ! -e "$dst" ] ; then
     ln -s $src $dst
-    secho changed "Symlinked $src into $dst"
+    secho changed "Symlinked $src into $dst" $quiet
   fi
 }
-
 
 #
 # Add environment path.
@@ -308,23 +321,24 @@ symlink_file() {
 add_environment_path() {
   local text=$1
   local path_file=$2
+  local quiet=$3
 
   local command_grep=$(which grep)
   local command_cat=$(which cat)
   if echo $PATH | $command_grep -ohq "$text"; then
-    secho status "Directory $text is already in PATH"
+    secho status "Directory $text is already in PATH" $quiet
   else
     if $command_cat $path_file | $command_grep -ohq "PATH=$text:\$PATH\$"; then
-      secho status "Directory $text already exported into file $path_file"
+      secho status "Directory $text already exported into file $path_file" $quiet
     else
       echo "PATH=$text:\$PATH" >> $path_file;
     fi
 
     export PATH=$text:$PATH
     if echo $PATH | $command_grep -ohq "$text"; then
-      secho changed "Added directory $text to current session PATH"
+      secho changed "Added directory $text to current session PATH" $quiet
     else
-      secho error "Unable to add directory $text to PATH"
+      secho error "Unable to add directory $text to PATH" $quiet
       return 1
     fi
   fi
@@ -334,10 +348,11 @@ add_environment_path() {
 # Create APP standards directory.
 #
 create_app_standards() {
+  local quiet=$1
   local conf_dir=$(get_conf_dir)
 
   if [ -z "$conf_dir" ] ; then
-    secho error "Unable to copy $DCR_APP_STANDARDS_DIR_SRC directory"
+    secho error "Unable to copy $DCR_APP_STANDARDS_DIR_SRC directory" $quiet
     return 1
   fi
 
@@ -345,9 +360,9 @@ create_app_standards() {
   if [ ! -d "$conf_dir/$DCR_APP_STANDARDS_DIR" ] ; then
     mkdir $conf_dir/$DCR_APP_STANDARDS_DIR
     cp -r $(get_dcr_dir)/$DCR_APP_STANDARDS_DIR_SRC/* $conf_dir/$DCR_APP_STANDARDS_DIR
-    secho changed "Copied $DCR_APP_STANDARDS_DIR_SRC directory to $conf_dir/$DCR_APP_STANDARDS_DIR"
+    secho changed "Copied $DCR_APP_STANDARDS_DIR_SRC directory to $conf_dir/$DCR_APP_STANDARDS_DIR" $quiet
   else
-    secho status "$DCR_APP_STANDARDS_DIR directory already exists in $conf_dir"
+    secho status "$DCR_APP_STANDARDS_DIR directory already exists in $conf_dir" $quiet
   fi
 }
 
@@ -355,6 +370,7 @@ create_app_standards() {
 # Register all codesniffer standards.
 #
 register_codesniffer_standards() {
+  local quiet=$1
   local paths=("${DCR_STANDARDS_PATHS[@]}")
   local command_phpcs=$(which phpcs)
   local command_phpcbf=$(which phpcbf)
@@ -363,12 +379,12 @@ register_codesniffer_standards() {
   # Check that phpcs is available. By the time this function is called all
   # composer binaries should already be exposed to PATH.
   if [ "$command_phpcs" != "$composer_bin/phpcs" ] || [ "$command_phpcbf" != "$composer_bin/phpcbf" ] ; then
-    secho error "Incorrect phpcs or phpcbf is in use. Make sure that boths phpcs and phpcbf are available in this session."
+    secho error "Incorrect phpcs or phpcbf is in use. Make sure that boths phpcs and phpcbf are available in this session." $quiet
     return 1
   fi
 
   # Add App standard directory to allow ruleset customisations.
-  create_app_standards
+  create_app_standards $quiet
 
   local installed_paths=""
   # Traverse all known sniffs locations and check for their existence before
@@ -390,7 +406,7 @@ register_codesniffer_standards() {
   done
 
   if [ -z "${installed_paths}" ] ; then
-    secho changed "No valid standards' paths provided."
+    secho changed "No valid standards' paths provided." $quiet
   fi
 
   # Remove leading comma.
@@ -398,7 +414,7 @@ register_codesniffer_standards() {
 
   codesniffer_config_set $command_phpcs installed_paths $installed_paths
   codesniffer_config_set $command_phpcbf installed_paths $installed_paths
-  secho changed "Set installed_path to $installed_paths."
+  secho changed "Set installed_path to $installed_paths." $quiet
 }
 
 #
@@ -426,6 +442,7 @@ codesniffer_config_set() {
 # Install JSCS.
 #
 install_jscs() {
+  local quiet=$1
   local command_npm=$(get_npm)
 
   command_global=""
@@ -438,10 +455,14 @@ install_jscs() {
   local jscs_installed=$?
 
   if [ $jscs_installed -eq 0 ] ; then
-    secho status "JSCS is already installed"
+    secho status "JSCS is already installed" $quiet
   else
-    $command_npm install $command_global jscs
-    secho changed "Installed JSCS"
+    local silent=""
+    if [ "$quiet" == 1 ] ; then
+      silent=" --silent"
+    fi
+    $command_npm install $silent $command_global jscs
+    secho changed "Installed JSCS" $quiet
   fi
 }
 
@@ -449,11 +470,12 @@ install_jscs() {
 # Register JSCS standards.
 #
 register_jscs_standards() {
+  local quiet=$1
   local command_phpcs=$(which phpcs)
   local jscs_path=$(get_jscs_bin_dir)
 
   # Create JSCS standards and configs.
-  create_jscs_standards
+  create_jscs_standards $quiet
 
   # Set JSCS binary path.
   codesniffer_config_set $command_phpcs "jscs_path" "$jscs_path"
@@ -463,13 +485,14 @@ register_jscs_standards() {
 # Create JSCS standards and configs.
 #
 create_jscs_standards() {
+  local quiet=$1
   local src_jscs_conf=$(get_dcr_dir)/$DCR_JSCSRC_CONF_EXAMPLE
   local dst_file=$(get_conf_dir)/$DCR_JSCSRC_CONF
   if [ -f $dst_file ] ; then
-    secho status "Skipping copying of $DCR_JSCSRC_CONF file - file $dst_file exists."
+    secho status "Skipping copying of $DCR_JSCSRC_CONF file - file $dst_file exists." $quiet
   else
     cp $src_jscs_conf $dst_file
-    secho changed "Copied example $DCR_JSCSRC_CONF file $src_jscs_conf to $dst_file."
+    secho changed "Copied example $DCR_JSCSRC_CONF file $src_jscs_conf to $dst_file." $quiet
   fi
 }
 
@@ -477,13 +500,15 @@ create_jscs_standards() {
 # Validate DCR installation.
 #
 validate_install() {
+  local quiet=$1
+
   which dcr>/dev/null
   local code=$?
   if [ "$code" == 0 ]; then
-    secho changed "DCR was successfully installed and is available in current session"
+    secho changed "DCR was successfully installed and is available in current session" $quiet
     return 0
   else
-    secho error "DCR was not successfully installed and is not available in current session"
+    secho error "DCR was not successfully installed and is not available in current session" $quiet
     return 1
   fi
 }
@@ -675,6 +700,12 @@ parse_yaml() {
 secho(){
   local type=$1
   local message=$2
+  local quiet=$3
+
+  if [ "$quiet" == 1 ] ; then
+    return;
+  fi
+
   case "$type" in
     status) cecho blue "=> $message";;
     changed) cecho green "=> $message";;
