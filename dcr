@@ -223,9 +223,6 @@ install() {
   local command_grep=$(which grep)
   local command_cat=$(which cat)
 
-  # Print installation information.
-  config_info $quiet
-
   # Config file is used to find current working directory, so the very first
   # check is to make sure that config file exist and create it if it does not.
   create_config_file $quiet
@@ -251,6 +248,9 @@ install() {
   # Register JSCS standards.
   register_jscs_standards $quiet
 
+  # Print installation information.
+  config_info $quiet
+
   # Validate that DCR was successfully installed.
   validate_install $quiet
 
@@ -266,7 +266,7 @@ config_info() {
   if [ "$quiet" == 1 ] ; then
     return
   fi
-  
+
   echo "--------------------------------------------------------------------------------"
   echo " DCR installation information"
   echo "--------------------------------------------------------------------------------"
