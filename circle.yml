@@ -12,15 +12,12 @@ dependencies:
   - cd $HOME/$CIRCLE_PROJECT_REPONAME && composer install
   # Run a second part of the installation to link all required parts.
   - cd $HOME/$CIRCLE_PROJECT_REPONAME && bash dcr install
+  # Install bats CLI testing.
+  - cd $HOME && git clone https://github.com/sstephenson/bats.git && cd bats && sudo ./install.sh /usr/local
 
 test:
-  pre:
-  # Install bats CLI testing.
-  - sudo add-apt-repository ppa:duggan/bats --yes
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq bats
   override:
   # Run environment tests.
-  - source ~/.profile && bats tests/bats/environment.bats
+  - cd $DCR_PROJECT_ROOT && source ~/.profile && bats -p tests/bats/environment.bats
   # Run app tests.
-  - source ~/.profile && bats tests/bats/app.bats
+  - cd $DCR_PROJECT_ROOT && source ~/.profile && bats -p tests/bats/app.bats
