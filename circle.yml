@@ -8,7 +8,7 @@ machine:
 dependencies:
   override:
   # Run installation of all dependencies unsing composer locally.
-  - cd $HOME/$CIRCLE_PROJECT_REPONAME && composer config -g github-oauth.github.com $GITHUB_TOKEN
+  - "if [ \"$GITHUB_TOKEN\" != \"\" ] ; then cd $HOME/$CIRCLE_PROJECT_REPONAME && composer config -g github-oauth.github.com $GITHUB_TOKEN; fi"
   - cd $HOME/$CIRCLE_PROJECT_REPONAME && composer install
   # Run a second part of the installation to link all required parts.
   - cd $HOME/$CIRCLE_PROJECT_REPONAME && bash dcr install
