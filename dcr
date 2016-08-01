@@ -248,10 +248,6 @@ install() {
   # Make sure that DCR is symlink into composer bin.
   symlink_file $(get_dcr) $(get_composer_bin_dir)/dcr $quiet
 
-  # To allow access to DCR binary from anywhere in the system, composer's binary
-  # directory needs to be added to the $PATH environment variable.
-  add_environment_path $(get_composer_bin_dir) $DCR_PATH_FILE $quiet
-
   # Register code sniffer install path to phpcs config to allow proper standards
   # path resolution. This also handles paths for global and local installation.
   register_codesniffer_standards $quiet
@@ -259,10 +255,6 @@ install() {
   if [ "$no_js" == 0 ] ; then
     # Separately add JS code sniffer.
     install_jscs $quiet
-
-    # To allow access to JSCS binary from anywhere in the system, npm's binary
-    # directory needs to be added to the $PATH environment variable.
-    add_environment_path $(get_jscs_bin_dir) $DCR_PATH_FILE $quiet
 
     # Register JSCS standards.
     register_jscs_standards $quiet
@@ -334,38 +326,6 @@ symlink_file() {
   if [ ! -e "$dst" ] ; then
     ln -s $src $dst
     secho changed "Symlinked $src into $dst" $quiet
-  fi
-}
-
-#
-# Add environment path.
-#
-add_environment_path() {
-  local text=$1
-  local path_file=$2
-  local quiet=$3
-
-  local command_grep=$(which grep)
-  local command_cat=$(which cat)
-
-  # Add directory to path file.
-  if $command_cat $path_file | $command_grep -ohq "PATH=$text:\$PATH\$"; then
-    secho status "Directory $text already exported into file $path_file" $quiet
-  else
-    echo "PATH=$text:\$PATH" >> $path_file;
-  fi
-
-  # Add directory to current session.
-  if echo $PATH | $command_grep -ohq "$text"; then
-    secho status "Directory $text is already in PATH for current session" $quiet
-  else
-    export PATH=$text:$PATH
-    if echo $PATH | $command_grep -ohq "$text"; then
-      secho changed "Added directory $text to current session PATH" $quiet
-    else
-      secho error "Unable to add directory $text to PATH" $quiet
-      return 1
-    fi
   fi
 }
 

@@ -14,7 +14,8 @@ There are 3 options:
 Install once, init for each project or run "as-is" to scan custom files.
 ```
 composer global require alexdesignworks/dcr
-dcr install && source ~/.profile
+echo 'export PATH="$PATH:$HOME/.composer/vendor/bin"' >> ~/.bashrc
+dcr install
 cd your_project_dir
 dcr init
 ```
@@ -24,7 +25,7 @@ Global build status (https://github.com/alexdesignworks/dcr-global-demo): [![Cir
 ### 2. Local per-project installation
 ```
 composer require alexdesignworks/dcr
-vendor/bin/dcr install && source ~/.profile
+vendor/bin/dcr install
 ```
 
 Local build status (https://github.com/alexdesignworks/dcr-demo): [![Circle CI](https://circleci.com/gh/alexdesignworks/dcr-demo.svg?style=shield)](https://circleci.com/gh/alexdesignworks/dcr-demo)
@@ -48,12 +49,12 @@ In `composer.json`:
 ## Usage
 From previously initialised directory:
 ```
-dcr
+vendor/bin/dcr
 ```
 
 For custom code linting (provided that DCR was installed globally):
 ```
-dcr file_or_directory
+vendor/bin/dcr file_or_directory
 ```
 
 ## FAQ
